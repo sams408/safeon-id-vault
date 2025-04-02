@@ -1,13 +1,24 @@
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Sidebar from "@/components/layouts/sidebar";
 import Header from "@/components/layouts/header";
 import { useSidebar } from "@/components/layouts/sidebar-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const DashboardLayout = () => {
-  const { expanded } = useSidebar();
+  const { expanded, userInfo } = useSidebar();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  // Check if user is logged in
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      // If no user is found, redirect to login
+      navigate("/login");
+    }
+  }, [navigate]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

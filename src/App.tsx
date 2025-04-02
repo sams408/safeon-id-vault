@@ -12,6 +12,7 @@ import Clients from "@/pages/clients";
 import Users from "@/pages/users";
 import Products from "@/pages/products";
 import Categories from "@/pages/categories";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/NotFound";
 import Login from "@/pages/login";
 import Registro from "@/pages/registro";
@@ -51,6 +52,7 @@ function App() {
                 <Route path="users" element={<Users />} />
                 <Route path="products" element={<Products />} />
                 <Route path="categories" element={<Categories />} />
+                <Route path="profile" element={<Profile />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

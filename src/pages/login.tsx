@@ -34,9 +34,20 @@ const Login = () => {
       // Simulate authentication delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      // Here you would normally check credentials with your auth service
+      // For now, we'll use a simple check for demo purposes
+      const userData = {
+        name: email.includes("admin") ? "Admin User" : "Regular User",
+        email: email,
+        role: email.includes("admin") ? "Administrador" : "Usuario",
+      };
+      
+      // Store user data in local storage or a state management solution
+      localStorage.setItem("user", JSON.stringify(userData));
+      
       // Success notification
       toast({
-        title: "¡Bienvenido!",
+        title: `¡Bienvenido, ${userData.name}!`,
         description: "Has iniciado sesión correctamente",
       });
       

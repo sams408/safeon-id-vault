@@ -2,11 +2,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+type UserInfo = {
+  name: string;
+  email: string;
+  role: string;
+};
+
 type SidebarContextType = {
   expanded: boolean;
   toggleSidebar: () => void;
   openMobile: boolean;
   setOpenMobile: (value: boolean) => void;
+  userInfo: UserInfo | null;
 };
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -26,7 +33,21 @@ interface SidebarProviderProps {
 export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   const [expanded, setExpanded] = useState(true);
   const [openMobile, setOpenMobile] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const isMobile = useIsMobile();
+  
+  // Load user info from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUserInfo(userData);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
   
   // Auto collapse sidebar on mobile
   useEffect(() => {
@@ -49,7 +70,8 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
         expanded, 
         toggleSidebar, 
         openMobile, 
-        setOpenMobile 
+        setOpenMobile,
+        userInfo
       }}
     >
       {children}
