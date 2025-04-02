@@ -5,7 +5,7 @@ import { LanguageCode, translations } from "./index";
 type LanguageContextType = {
   language: LanguageCode;
   setLanguage: (lang: LanguageCode) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -41,8 +41,8 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
     setLanguageState(lang);
   };
 
-  // Translation function
-  const t = (key: string) => {
+  // Translation function with parameter interpolation
+  const t = (key: string, params?: Record<string, string | number>) => {
     const keys = key.split(".");
     let translation: any = translations[language];
     
@@ -59,11 +59,21 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
             return key; // Return the key itself if not found
           }
         }
-        return typeof fallback === "string" ? fallback : key;
+        return typeof fallback === "string" ? interpolateString(fallback, params) : key;
       }
     }
     
-    return typeof translation === "string" ? translation : key;
+    return typeof translation === "string" ? interpolateString(translation, params) : key;
+  };
+
+  // Helper function to replace parameters in translation strings
+  const interpolateString = (str: string, params?: Record<string, string | number>): string => {
+    if (!params) return str;
+    
+    return Object.entries(params).reduce((result, [key, value]) => {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      return result.replace(regex, String(value));
+    }, str);
   };
 
   return (
