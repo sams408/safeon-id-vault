@@ -1,17 +1,15 @@
 
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type SidebarContextType = {
   expanded: boolean;
-  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
   toggleSidebar: () => void;
+  openMobile: boolean;
+  setOpenMobile: (value: boolean) => void;
 };
 
-const SidebarContext = createContext<SidebarContextType>({
-  expanded: true,
-  setExpanded: () => {},
-  toggleSidebar: () => {},
-});
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
@@ -21,16 +19,40 @@ export const useSidebar = () => {
   return context;
 };
 
-export function SidebarProvider({ children }: { children: React.ReactNode }) {
+interface SidebarProviderProps {
+  children: ReactNode;
+}
+
+export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   const [expanded, setExpanded] = useState(true);
+  const [openMobile, setOpenMobile] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Auto collapse sidebar on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setExpanded(false);
+    }
+  }, [isMobile]);
 
   const toggleSidebar = () => {
-    setExpanded((prev) => !prev);
+    if (isMobile) {
+      setOpenMobile(!openMobile);
+    } else {
+      setExpanded(!expanded);
+    }
   };
 
   return (
-    <SidebarContext.Provider value={{ expanded, setExpanded, toggleSidebar }}>
+    <SidebarContext.Provider 
+      value={{ 
+        expanded, 
+        toggleSidebar, 
+        openMobile, 
+        setOpenMobile 
+      }}
+    >
       {children}
     </SidebarContext.Provider>
   );
-}
+};

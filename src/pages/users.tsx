@@ -6,6 +6,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { UserForm } from "@/components/users/UserForm";
 import { UsersList } from "@/components/users/UsersList";
 import { UserDeleteDialog } from "@/components/users/UserDeleteDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Users = () => {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -14,6 +15,7 @@ const Users = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const loadUsers = useCallback(async () => {
     try {
@@ -90,7 +92,7 @@ const Users = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2 md:px-0">
       <UsersList
         users={users}
         isLoading={isLoading}

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { deleteUser } from "@/services/users";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UserDeleteDialogProps {
   userId: string | null;
@@ -25,6 +26,7 @@ export const UserDeleteDialog = ({
 }: UserDeleteDialogProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Reset state when dialog closes
   useEffect(() => {
@@ -61,7 +63,7 @@ export const UserDeleteDialog = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-md">
+    <DialogContent className={`sm:max-w-md ${isMobile ? 'mx-4 p-4' : ''}`}>
       <DialogHeader>
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogDescription>
@@ -69,11 +71,12 @@ export const UserDeleteDialog = ({
           Esta acción no se puede deshacer.
         </DialogDescription>
       </DialogHeader>
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
         <Button
           variant="outline"
           onClick={() => onOpenChange(false)}
           disabled={isDeleting}
+          className="mb-2 sm:mb-0 w-full sm:w-auto"
         >
           Cancelar
         </Button>
@@ -81,6 +84,7 @@ export const UserDeleteDialog = ({
           variant="destructive"
           onClick={handleDeleteConfirm}
           disabled={isDeleting}
+          className="w-full sm:w-auto"
         >
           {isDeleting ? "Eliminando..." : "Eliminar"}
         </Button>
