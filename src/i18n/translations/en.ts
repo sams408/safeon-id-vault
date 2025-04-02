@@ -53,5 +53,26 @@ export const en = {
     clientDeletedDescription: "The client has been successfully deleted",
     deleteConfirmTitle: "Are you sure?",
     deleteConfirmDescription: "This action cannot be undone. This will permanently delete the client \"{{name}}\" and all associated data."
+  },
+  categories: {
+    title: "Categories",
+    addCategory: "Add Category",
+    name: "Name",
+    productCount: "Number of products",
+    actions: "Actions",
+    edit: "Edit",
+    delete: "Delete",
+    searchPlaceholder: "Search categories...",
+    errorTitle: "Error",
+    errorLoadingCategories: "Could not load categories",
+    errorDeletingCategory: "Could not delete category",
+    categoryDeleted: "Category deleted",
+    categoryDeletedDescription: "The category has been successfully deleted",
+    deleteConfirmTitle: "Are you sure?",
+    deleteConfirmDescription: "This action cannot be undone. This will permanently delete the category \"{{name}}\" and all associated data.",
+    createdSuccessfully: "Category created successfully",
+    editCategory: "Edit Category",
+    create: "Create",
+    saving: "Saving..."
   }
 };

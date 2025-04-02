@@ -14,12 +14,17 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { fetchCategories, Category, deleteCategory } from "@/services/categories";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
+import { CategoryDeleteDialog } from "@/components/categories/CategoryDeleteDialog";
+import { useLanguage } from "@/i18n/language-provider";
 
 const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const loadCategories = async () => {
     try {
@@ -29,8 +34,8 @@ const Categories = () => {
     } catch (error) {
       console.error("Error loading categories:", error);
       toast({
-        title: "Error",
-        description: "No se pudieron cargar las categorías",
+        title: t("categories.errorTitle"),
+        description: t("categories.errorLoadingCategories"),
         variant: "destructive",
       });
     } finally {
@@ -46,58 +51,62 @@ const Categories = () => {
     setDialogOpen(true);
   };
 
-  const handleDeleteCategory = async (id: string) => {
-    try {
-      await deleteCategory(id);
-      toast({
-        title: "Categoría eliminada",
-        description: "La categoría se ha eliminado correctamente",
-      });
-      loadCategories();
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la categoría",
-        variant: "destructive",
-      });
-    }
+  const handleDeleteCategory = (category: Category) => {
+    setSelectedCategory(category);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!selectedCategory) return;
+    await deleteCategory(selectedCategory.id);
+    await loadCategories();
   };
 
   const columns: Column<Category>[] = [
     {
-      header: "Nombre",
+      header: t("categories.name"),
       accessorKey: "name",
+      searchable: true,
     },
     {
-      header: "Cantidad de productos",
+      header: t("categories.productCount"),
       accessorKey: "product_count",
     },
     {
-      header: "Acciones",
+      header: t("categories.actions"),
       accessorKey: "id",
-      cell: (category) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Edit size={16} className="mr-2" /> Editar
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-destructive"
-              onClick={() => handleDeleteCategory(category.id)}
-            >
-              <Trash size={16} className="mr-2" /> Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      cell: (item) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                <MoreHorizontal size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuLabel>{t("categories.actions")}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Edit clicked for:", item.name);
+              }}>
+                <Edit size={16} className="mr-2" /> {t("categories.edit")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDeleteCategory(item);
+                }}
+              >
+                <Trash size={16} className="mr-2" /> {t("categories.delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
     },
   ];
@@ -107,13 +116,13 @@ const Categories = () => {
       <DataTable
         columns={columns}
         data={categories}
-        title="Categorías"
-        searchPlaceholder="Buscar categorías..."
+        title={t("categories.title")}
+        searchPlaceholder={t("categories.searchPlaceholder")}
         onAddNew={handleAddCategory}
         isLoading={isLoading}
         icon={LayoutList}
         addButtonIcon={<Plus className="mr-2" size={16} />}
-        addButtonText="Nueva categoría"
+        addButtonText={t("categories.addCategory")}
       />
       
       <CategoryDialog 
@@ -121,6 +130,15 @@ const Categories = () => {
         onOpenChange={setDialogOpen}
         onCategoryCreated={loadCategories}
       />
+
+      {selectedCategory && (
+        <CategoryDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          categoryName={selectedCategory.name}
+          onConfirm={confirmDeleteCategory}
+        />
+      )}
     </div>
   );
 };

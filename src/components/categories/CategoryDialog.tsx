@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { createCategory } from "@/services/categories";
+import { useLanguage } from "@/i18n/language-provider";
 import {
   Dialog,
   DialogContent,
@@ -28,14 +29,15 @@ export function CategoryDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
       toast({
-        title: "Error",
-        description: "El nombre de la categoría es obligatorio",
+        title: t("categories.errorTitle"),
+        description: t("categories.nameRequired"),
         variant: "destructive",
       });
       return;
@@ -46,8 +48,8 @@ export function CategoryDialog({
       await createCategory({ name });
       
       toast({
-        title: "Categoría creada",
-        description: "La categoría se ha creado correctamente",
+        title: t("categories.createdSuccessfully"),
+        description: t("categories.categoryCreatedDescription"),
       });
       
       setName("");
@@ -56,8 +58,8 @@ export function CategoryDialog({
     } catch (error) {
       console.error("Error creating category:", error);
       toast({
-        title: "Error",
-        description: "No se pudo crear la categoría",
+        title: t("categories.errorTitle"),
+        description: t("categories.errorCreatingCategory"),
         variant: "destructive",
       });
     } finally {
@@ -69,20 +71,20 @@ export function CategoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nueva categoría</DialogTitle>
+          <DialogTitle>{t("categories.addCategory")}</DialogTitle>
           <DialogDescription>
-            Crea una nueva categoría para organizar tus productos.
+            {t("categories.addCategoryDescription")}
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre</Label>
+            <Label htmlFor="name">{t("categories.name")}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nombre de la categoría"
+              placeholder={t("categories.namePlaceholder")}
             />
           </div>
           
@@ -93,10 +95,10 @@ export function CategoryDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Guardando..." : "Guardar"}
+              {isSubmitting ? t("categories.saving") : t("categories.create")}
             </Button>
           </DialogFooter>
         </form>

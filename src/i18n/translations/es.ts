@@ -53,5 +53,26 @@ export const es = {
     clientDeletedDescription: "El cliente ha sido eliminado correctamente",
     deleteConfirmTitle: "¿Estás seguro?",
     deleteConfirmDescription: "Esta acción no se puede deshacer. Esto eliminará permanentemente el cliente \"{{name}}\" y todos sus datos asociados."
+  },
+  categories: {
+    title: "Categorías",
+    addCategory: "Agregar Categoría",
+    name: "Nombre",
+    productCount: "Cantidad de productos",
+    actions: "Acciones",
+    edit: "Editar",
+    delete: "Eliminar",
+    searchPlaceholder: "Buscar categorías...",
+    errorTitle: "Error",
+    errorLoadingCategories: "No se pudieron cargar las categorías",
+    errorDeletingCategory: "No se pudo eliminar la categoría",
+    categoryDeleted: "Categoría eliminada",
+    categoryDeletedDescription: "La categoría ha sido eliminada correctamente",
+    deleteConfirmTitle: "¿Estás seguro?",
+    deleteConfirmDescription: "Esta acción no se puede deshacer. Esto eliminará permanentemente la categoría \"{{name}}\" y todos sus datos asociados.",
+    createdSuccessfully: "Categoría creada correctamente",
+    editCategory: "Editar Categoría",
+    create: "Crear",
+    saving: "Guardando..."
   }
 };
