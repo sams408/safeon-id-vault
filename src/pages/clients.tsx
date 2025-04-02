@@ -35,6 +35,7 @@ const Clients = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,8 +47,10 @@ const Clients = () => {
       setIsLoading(true);
       const data = await fetchClients();
       setClients(data);
+      setConnectionError(false);
     } catch (error) {
       console.error("Error loading clients:", error);
+      setConnectionError(true);
       toast({
         title: "Error",
         description: "No se pudieron cargar los clientes",
@@ -119,7 +122,7 @@ const Clients = () => {
 
   return (
     <div className="space-y-6">
-      <ConnectionAlert />
+      <ConnectionAlert visible={connectionError} />
       
       <ClientsTable 
         clients={clients} 
@@ -132,12 +135,14 @@ const Clients = () => {
 
       {/* Form Dialog */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <ClientForm 
-          onClientSaved={handleClientSaved}
-          onCancel={() => setIsFormDialogOpen(false)}
-          initialClient={isEditing ? selectedClient : null}
-          isEditMode={isEditing}
-        />
+        <DialogContent>
+          <ClientForm 
+            onClientCreated={handleClientSaved}
+            onCancel={() => setIsFormDialogOpen(false)}
+            initialClient={isEditing ? selectedClient : null}
+            isEditMode={isEditing}
+          />
+        </DialogContent>
       </Dialog>
 
       {/* View Dialog */}

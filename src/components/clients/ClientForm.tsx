@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { createClient } from "@/services/clients";
+import { createClient, updateClient, Client } from "@/services/clients";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,11 +15,10 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 type ClientFormData = {
@@ -29,17 +28,24 @@ type ClientFormData = {
   status: 'active' | 'inactive';
 };
 
-type ClientFormProps = {
+export type ClientFormProps = {
   onClientCreated: () => Promise<void>;
   onCancel: () => void;
+  initialClient?: Client | null;
+  isEditMode?: boolean;
 };
 
-export const ClientForm = ({ onClientCreated, onCancel }: ClientFormProps) => {
+export const ClientForm = ({ 
+  onClientCreated, 
+  onCancel, 
+  initialClient = null, 
+  isEditMode = false 
+}: ClientFormProps) => {
   const [newClient, setNewClient] = useState<ClientFormData>({
-    name: "",
-    email: "",
-    phone: "",
-    status: "active",
+    name: initialClient?.name || "",
+    email: initialClient?.email || "",
+    phone: initialClient?.phone || "",
+    status: initialClient?.status || "active",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -71,24 +77,30 @@ export const ClientForm = ({ onClientCreated, onCancel }: ClientFormProps) => {
     
     try {
       setIsSubmitting(true);
-      console.log("Enviando datos del cliente a Supabase:", newClient);
       
-      await createClient(newClient);
+      if (isEditMode && initialClient) {
+        console.log("Actualizando cliente:", initialClient.id, newClient);
+        await updateClient(initialClient.id, newClient);
+        toast({
+          title: "Éxito",
+          description: "Cliente actualizado correctamente",
+        });
+      } else {
+        console.log("Creando cliente con datos:", newClient);
+        await createClient(newClient);
+        toast({
+          title: "Éxito",
+          description: "Cliente creado correctamente",
+        });
+      }
       
-      // Show success notification
-      toast({
-        title: "Éxito",
-        description: "Cliente creado correctamente",
-      });
-      
-      // Reload the client list to show the new client
+      // Reload the client list to show the updated clients
       await onClientCreated();
-      onCancel();
     } catch (error) {
-      console.error("Error creating client:", error);
+      console.error("Error saving client:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear el cliente. Verifique su conexión a Supabase.",
+        description: `No se pudo ${isEditMode ? 'actualizar' : 'crear'} el cliente. Verifique su conexión a Supabase.`,
         variant: "destructive",
       });
     } finally {
@@ -97,11 +109,11 @@ export const ClientForm = ({ onClientCreated, onCancel }: ClientFormProps) => {
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px]">
+    <>
       <DialogHeader>
-        <DialogTitle>Crear nuevo cliente</DialogTitle>
+        <DialogTitle>{isEditMode ? 'Editar cliente' : 'Crear nuevo cliente'}</DialogTitle>
         <DialogDescription>
-          Complete el formulario para crear un nuevo cliente
+          Complete el formulario para {isEditMode ? 'actualizar el' : 'crear un nuevo'} cliente
         </DialogDescription>
       </DialogHeader>
 
@@ -189,12 +201,12 @@ export const ClientForm = ({ onClientCreated, onCancel }: ClientFormProps) => {
             ) : (
               <span className="flex items-center gap-2">
                 <Save className="h-4 w-4" />
-                Guardar
+                {isEditMode ? 'Actualizar' : 'Guardar'}
               </span>
             )}
           </Button>
         </DialogFooter>
       </form>
-    </DialogContent>
+    </>
   );
 };
