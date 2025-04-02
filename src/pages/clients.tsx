@@ -27,10 +27,17 @@ const Clients = () => {
 
   const testSupabaseConnection = async () => {
     try {
-      const { data, error } = await supabase.from('clients').select('count', { count: 'exact', head: true });
+      // Use a raw query to check connection instead of a table query
+      const { data, error } = await supabase.rpc('get_client_count');
+      
       if (error) {
         console.error('Supabase connection failed:', error);
-        return false;
+        // Try a simpler query as fallback
+        const { error: fallbackError } = await supabase.from('clients').select('id', { count: 'exact', head: true });
+        if (fallbackError) {
+          console.error('Fallback connection test failed:', fallbackError);
+          return false;
+        }
       }
       console.log('Supabase connection successful');
       return true;
