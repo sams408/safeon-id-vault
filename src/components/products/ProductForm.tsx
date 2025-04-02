@@ -21,6 +21,7 @@ type ProductFormData = {
   description: string;
   client_id: string;
   category_id: string;
+  category: string;
   created_by: string;
 };
 
@@ -34,11 +35,11 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
     name: "",
     description: "",
     client_id: "",
-    category_id: "sample-category", // Default value until categories are implemented
+    category_id: "default",
+    category: "Default", 
     created_by: "admin", // Default value
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -81,7 +82,7 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
       console.error("Error creating product:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear el ítem. Verifique su conexión a Supabase.",
+        description: "No se pudo crear el ítem",
         variant: "destructive",
       });
     } finally {
@@ -103,7 +104,6 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
           <ClientSelect 
             value={newProduct.client_id} 
             onValueChange={handleClientChange}
-            disabled={isLoadingClients}
           />
           
           <div className="grid grid-cols-4 items-center gap-4">

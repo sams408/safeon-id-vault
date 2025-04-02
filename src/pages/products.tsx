@@ -13,17 +13,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { fetchProducts, Product, createProduct } from "@/services/products";
+import { fetchProducts, Product, deleteProduct } from "@/services/products";
 import { 
   Dialog,
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { ProductForm } from "@/components/products/ProductForm";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const loadProducts = async () => {
@@ -45,7 +57,7 @@ const Products = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [toast]);
+  }, []);
 
   const handleAddProduct = () => {
     setDialogOpen(true);
@@ -54,6 +66,34 @@ const Products = () => {
   const handleProductCreated = async () => {
     await loadProducts();
     setDialogOpen(false);
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedProductId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedProductId) return;
+
+    try {
+      await deleteProduct(selectedProductId);
+      toast({
+        title: "Éxito",
+        description: "Ítem eliminado correctamente",
+      });
+      await loadProducts();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el ítem",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedProductId(null);
+    }
   };
 
   const columns: Column<Product>[] = [
@@ -108,7 +148,10 @@ const Products = () => {
               <Edit size={16} className="mr-2" /> Editar
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={() => handleDeleteClick(product.id)}
+            >
               <Trash size={16} className="mr-2" /> Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -135,6 +178,24 @@ const Products = () => {
           onCancel={() => setDialogOpen(false)} 
         />
       </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Está seguro de eliminar este ítem?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente el ítem
+              y no podrá recuperarlo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
