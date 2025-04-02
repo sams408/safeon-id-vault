@@ -31,7 +31,7 @@ const Clients = () => {
       // Using select() without parameters to avoid type errors
       const { error: clientsError } = await supabase
         .from('clients')
-        .select();
+        .select('*', { count: 'exact', head: true });
       
       if (clientsError) {
         console.error('Clients table connection failed:', clientsError);
