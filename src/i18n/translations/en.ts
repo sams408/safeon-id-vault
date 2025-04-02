@@ -1,4 +1,3 @@
-
 export const en = {
   common: {
     language: "Language",
@@ -17,7 +16,8 @@ export const en = {
     noDataAvailable: "No data available",
     cancel: "Cancel",
     delete: "Delete",
-    deleting: "Deleting..."
+    deleting: "Deleting...",
+    save: "Save"
   },
   sidebar: {
     dashboard: "Dashboard",
@@ -66,8 +66,11 @@ export const en = {
     errorTitle: "Error",
     errorLoadingCategories: "Could not load categories",
     errorDeletingCategory: "Could not delete category",
+    errorUpdatingCategory: "Could not update category",
     categoryDeleted: "Category deleted",
     categoryDeletedDescription: "The category has been successfully deleted",
+    categoryUpdated: "Category updated",
+    categoryUpdatedDescription: "The category has been successfully updated",
     deleteConfirmTitle: "Are you sure?",
     deleteConfirmDescription: "This action cannot be undone. This will permanently delete the category \"{{name}}\" and all associated data.",
     createdSuccessfully: "Category created successfully",

@@ -15,12 +15,14 @@ import { useToast } from "@/hooks/use-toast";
 import { fetchCategories, Category, deleteCategory } from "@/services/categories";
 import { CategoryDialog } from "@/components/categories/CategoryDialog";
 import { CategoryDeleteDialog } from "@/components/categories/CategoryDeleteDialog";
+import { CategoryEditDialog } from "@/components/categories/CategoryEditDialog";
 import { useLanguage } from "@/i18n/language-provider";
 
 const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const { toast } = useToast();
@@ -51,20 +53,12 @@ const Categories = () => {
     setDialogOpen(true);
   };
 
-  const handleEditCategory = (category: Category, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    console.log("Edit clicked for:", category.name);
-    // Implementation for editing will go here
+  const handleEditCategory = (category: Category) => {
+    setSelectedCategory(category);
+    setEditDialogOpen(true);
   };
 
-  const handleDeleteCategory = (category: Category, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleDeleteCategory = (category: Category) => {
     setSelectedCategory(category);
     setDeleteDialogOpen(true);
   };
@@ -89,19 +83,13 @@ const Categories = () => {
       header: t("categories.actions"),
       accessorKey: "id",
       cell: (item) => (
-        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="sm"
                 className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  if (e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }
-                }}
               >
                 <MoreHorizontal size={16} />
                 <span className="sr-only">{t("categories.actions")}</span>
@@ -115,23 +103,15 @@ const Categories = () => {
               <DropdownMenuLabel>{t("categories.actions")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleEditCategory(item);
-                }}
                 className="cursor-pointer flex items-center text-sm px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => handleEditCategory(item)}
               >
                 <Edit size={16} className="mr-2 text-gray-500" /> {t("categories.edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="cursor-pointer flex items-center text-sm px-2 py-1.5 text-red-600 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleDeleteCategory(item);
-                }}
+                onClick={() => handleDeleteCategory(item)}
               >
                 <Trash size={16} className="mr-2" /> {t("categories.delete")}
               </DropdownMenuItem>
@@ -163,12 +143,21 @@ const Categories = () => {
       />
 
       {selectedCategory && (
-        <CategoryDeleteDialog
-          open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
-          categoryName={selectedCategory.name}
-          onConfirm={confirmDeleteCategory}
-        />
+        <>
+          <CategoryEditDialog
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            category={selectedCategory}
+            onCategoryUpdated={loadCategories}
+          />
+
+          <CategoryDeleteDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            categoryName={selectedCategory.name}
+            onConfirm={confirmDeleteCategory}
+          />
+        </>
       )}
     </div>
   );
