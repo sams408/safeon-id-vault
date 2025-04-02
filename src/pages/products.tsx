@@ -1,34 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, Eye, MoreHorizontal, Package } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { fetchProducts, Product, deleteProduct } from "@/services/products";
-import { 
-  Dialog,
-  DialogTrigger 
-} from "@/components/ui/dialog";
-import { ProductForm } from "@/components/products/ProductForm";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { fetchProducts, deleteProduct } from "@/services/products";
+import { ProductsTable } from "@/components/products/ProductsTable";
+import { ProductDialog } from "@/components/products/ProductDialog";
+import { DeleteProductDialog } from "@/components/products/DeleteProductDialog";
+import { Product } from "@/services/products";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -96,106 +73,27 @@ const Products = () => {
     }
   };
 
-  const columns: Column<Product>[] = [
-    {
-      header: "Nombre",
-      accessorKey: "name",
-    },
-    {
-      header: "Descripción",
-      accessorKey: "description",
-      cell: (product) => (
-        <div className="max-w-xs truncate">{product.description}</div>
-      ),
-    },
-    {
-      header: "Cliente",
-      accessorKey: "client_name",
-    },
-    {
-      header: "Categoría",
-      accessorKey: "category",
-      cell: (product) => (
-        <Badge variant="outline">{product.category}</Badge>
-      ),
-    },
-    {
-      header: "Creado por",
-      accessorKey: "created_by",
-    },
-    {
-      header: "Creado el",
-      accessorKey: "created_at",
-      cell: (product) => new Date(product.created_at).toLocaleDateString(),
-    },
-    {
-      header: "Acciones",
-      accessorKey: "id",
-      cell: (product) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Eye size={16} className="mr-2" /> Ver detalles
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Edit size={16} className="mr-2" /> Editar
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-destructive"
-              onClick={() => handleDeleteClick(product.id)}
-            >
-              <Trash size={16} className="mr-2" /> Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
-
   return (
     <div className="space-y-6">
-      <DataTable
-        columns={columns}
-        data={products}
-        title="Ítems"
-        searchPlaceholder="Buscar ítems..."
-        onAddNew={handleAddProduct}
+      <ProductsTable 
+        products={products}
         isLoading={isLoading}
-        icon={Package}
+        onAddNew={handleAddProduct}
+        onDelete={handleDeleteClick}
       />
       
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <ProductForm 
-          onProductCreated={handleProductCreated} 
-          onCancel={() => setDialogOpen(false)} 
-        />
-      </Dialog>
+      <ProductDialog 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen}
+        onProductCreated={handleProductCreated}
+        onCancel={() => setDialogOpen(false)}
+      />
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Está seguro de eliminar este ítem?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Esto eliminará permanentemente el ítem
-              y no podrá recuperarlo.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteProductDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 };
