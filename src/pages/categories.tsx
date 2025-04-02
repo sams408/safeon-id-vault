@@ -51,7 +51,16 @@ const Categories = () => {
     setDialogOpen(true);
   };
 
-  const handleDeleteCategory = (category: Category) => {
+  const handleEditCategory = (category: Category, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Edit clicked for:", category.name);
+    // Implementation for editing will go here
+  };
+
+  const handleDeleteCategory = (category: Category, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setSelectedCategory(category);
     setDeleteDialogOpen(true);
   };
@@ -76,31 +85,31 @@ const Categories = () => {
       header: t("categories.actions"),
       accessorKey: "id",
       cell: (item) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="focus:ring-0 focus:ring-offset-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <MoreHorizontal size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuContent align="end" className="w-[160px] bg-background">
               <DropdownMenuLabel>{t("categories.actions")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("Edit clicked for:", item.name);
-              }}>
+              <DropdownMenuItem 
+                onClick={(e) => handleEditCategory(item, e)}
+                className="cursor-pointer"
+              >
                 <Edit size={16} className="mr-2" /> {t("categories.edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                className="text-destructive"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDeleteCategory(item);
-                }}
+                className="text-destructive cursor-pointer"
+                onClick={(e) => handleDeleteCategory(item, e)}
               >
                 <Trash size={16} className="mr-2" /> {t("categories.delete")}
               </DropdownMenuItem>
