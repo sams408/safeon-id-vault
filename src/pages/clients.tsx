@@ -27,8 +27,11 @@ const Clients = () => {
 
   const testSupabaseConnection = async () => {
     try {
-      // First try a simple query to the clients table
-      const { error: clientsError } = await supabase.from('clients').select('id', { count: 'exact', head: true });
+      // First try a simple query to test the connection
+      // Use `count` with `exact` directly without trying to select 'id'
+      const { error: clientsError } = await supabase
+        .from('clients')
+        .select('*', { count: 'exact', head: true });
       
       if (clientsError) {
         console.error('Clients table connection failed:', clientsError);
