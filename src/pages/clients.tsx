@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, Eye, MoreHorizontal, Save } from "lucide-react";
+import { Edit, Trash, Eye, MoreHorizontal, Save, AlertTriangle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,14 +29,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { fetchClients, createClient, Client } from "@/services/clients";
+import { testSupabaseConnection } from "@/lib/supabase";
 
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
   const [newClient, setNewClient] = useState<{
     name: string;
     email: string;
@@ -52,6 +60,10 @@ const Clients = () => {
 
   useEffect(() => {
     loadClients();
+    // Test Supabase connection on component mount
+    testSupabaseConnection().then(isConnected => {
+      setConnectionError(!isConnected);
+    });
   }, []);
 
   const loadClients = async () => {
@@ -59,11 +71,13 @@ const Clients = () => {
       setIsLoading(true);
       const data = await fetchClients();
       setClients(data);
+      setConnectionError(false);
     } catch (error) {
       console.error("Error loading clients:", error);
+      setConnectionError(true);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los clientes",
+        description: "No se pudieron cargar los clientes. Verifique su conexión a Supabase.",
         variant: "destructive",
       });
     } finally {
@@ -109,6 +123,13 @@ const Clients = () => {
     
     try {
       setIsSubmitting(true);
+      
+      // Test connection before attempting to create
+      const isConnected = await testSupabaseConnection();
+      if (!isConnected) {
+        throw new Error("No se pudo conectar a Supabase. Verifique su configuración.");
+      }
+      
       await createClient(newClient);
       
       // Reset form and close dialog
@@ -124,9 +145,10 @@ const Clients = () => {
       await loadClients();
     } catch (error) {
       console.error("Error creating client:", error);
+      setConnectionError(true);
       toast({
         title: "Error",
-        description: "No se pudo crear el cliente",
+        description: "No se pudo crear el cliente. Verifique su conexión a Supabase.",
         variant: "destructive",
       });
     } finally {
@@ -192,6 +214,16 @@ const Clients = () => {
 
   return (
     <div className="space-y-6">
+      {connectionError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Error de conexión</AlertTitle>
+          <AlertDescription>
+            No se pudo conectar a Supabase. Verifique que su URL y clave de Supabase sean correctas en el archivo .env.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <DataTable
         columns={columns}
         data={clients}
@@ -281,7 +313,7 @@ const Clients = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
+                disabled={isSubmitting || connectionError}
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
