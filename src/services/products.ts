@@ -28,7 +28,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
         category,
         created_by,
         created_at,
-        clients:client_id (name)
+        clients (name)
       `)
       .order('created_at', { ascending: false });
 
@@ -67,7 +67,7 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
         category,
         created_by,
         created_at,
-        clients:client_id (name)
+        clients (name)
       `)
       .eq('id', id)
       .single();
@@ -117,7 +117,7 @@ export const createProduct = async (product: Omit<Product, 'id' | 'created_at' |
         category,
         created_by,
         created_at,
-        clients:client_id (name)
+        clients (name)
       `)
       .single();
 
@@ -165,7 +165,7 @@ export const updateProduct = async (id: string, product: Partial<Omit<Product, '
         category,
         created_by,
         created_at,
-        clients:client_id (name)
+        clients (name)
       `)
       .single();
 
