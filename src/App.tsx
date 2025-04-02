@@ -17,7 +17,7 @@ import Login from "@/pages/login";
 import Registro from "@/pages/registro";
 import ErrorBoundary from "@/components/error-boundary";
 
-// Create a new QueryClient instance with improved error handling
+// Create a new QueryClient instance with improved configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -25,9 +25,6 @@ const queryClient = new QueryClient({
       retry: 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-      onError: (error) => {
-        console.error('Query error:', error);
-      },
     },
   },
 });
