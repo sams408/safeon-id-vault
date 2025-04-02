@@ -1,5 +1,6 @@
 
 import { Client } from "@/services/clients";
+import { useLanguage } from "@/i18n/language-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface ClientDeleteDialogProps {
   client: Client | null;
@@ -24,28 +26,50 @@ export function ClientDeleteDialog({
   onOpenChange, 
   onConfirm 
 }: ClientDeleteDialogProps) {
+  const { t } = useLanguage();
+  const [isDeleting, setIsDeleting] = useState(false);
+  
   if (!client) return null;
+  
+  const handleConfirm = async () => {
+    try {
+      setIsDeleting(true);
+      await onConfirm();
+    } finally {
+      setIsDeleting(false);
+      onOpenChange(false);
+    }
+  };
   
   return (
     <AlertDialog 
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(newOpen) => {
+        if (!isDeleting) {
+          onOpenChange(newOpen);
+        }
+      }}
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+          <AlertDialogTitle>{t("clients.deleteConfirmTitle")}</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción no se puede deshacer. Esto eliminará permanentemente el cliente
-            &quot;{client.name}&quot; y todos sus datos asociados.
+            {t("clients.deleteConfirmDescription", { name: client.name })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>
+            {t("common.cancel")}
+          </AlertDialogCancel>
           <AlertDialogAction 
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              handleConfirm();
+            }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={isDeleting}
           >
-            Eliminar
+            {isDeleting ? t("common.deleting") : t("common.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

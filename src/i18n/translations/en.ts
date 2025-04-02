@@ -14,7 +14,10 @@ export const en = {
     dashboard: "Dashboard",
     loading: "Loading...",
     noResultsFound: "No results found",
-    noDataAvailable: "No data available"
+    noDataAvailable: "No data available",
+    cancel: "Cancel",
+    delete: "Delete",
+    deleting: "Deleting..."
   },
   sidebar: {
     dashboard: "Dashboard",
@@ -47,6 +50,8 @@ export const en = {
     errorLoadingClients: "Could not load clients",
     errorDeletingClient: "Could not delete client",
     clientDeleted: "Client deleted",
-    clientDeletedDescription: "The client has been successfully deleted"
+    clientDeletedDescription: "The client has been successfully deleted",
+    deleteConfirmTitle: "Are you sure?",
+    deleteConfirmDescription: "This action cannot be undone. This will permanently delete the client \"{{name}}\" and all associated data."
   }
 };

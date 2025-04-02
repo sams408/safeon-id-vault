@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface ClientsTableProps {
   clients: Client[];
@@ -32,6 +33,25 @@ export const ClientsTable = ({
   onView
 }: ClientsTableProps) => {
   const { t } = useLanguage();
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  
+  // Handle menu item click with proper event handling
+  const handleMenuItemClick = (
+    e: React.MouseEvent, 
+    clientId: string, 
+    action: (id: string) => void | undefined
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDropdown(null);
+    
+    // Use setTimeout to avoid React state update conflicts
+    setTimeout(() => {
+      if (action) {
+        action(clientId);
+      }
+    }, 50);
+  };
   
   const columns: Column<Client>[] = [
     {
@@ -70,28 +90,48 @@ export const ClientsTable = ({
       accessorKey: "id",
       searchable: false,
       cell: (client) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+        <DropdownMenu 
+          open={activeDropdown === client.id}
+          onOpenChange={(open) => {
+            setActiveDropdown(open ? client.id : null);
+          }}
+        >
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreHorizontal size={16} />
+              <span className="sr-only">{t("clients.actions")}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="z-50 w-48 bg-popover">
             <DropdownMenuLabel>{t("clients.actions")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onView && onView(client.id)}>
-              <Eye size={16} className="mr-2" /> {t("clients.view")}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit && onEdit(client.id)}>
-              <Edit size={16} className="mr-2" /> {t("clients.edit")}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-destructive"
-              onClick={() => onDelete && onDelete(client.id)}
-            >
-              <Trash size={16} className="mr-2" /> {t("clients.delete")}
-            </DropdownMenuItem>
+            {onView && (
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={(e) => handleMenuItemClick(e, client.id, onView)}
+              >
+                <Eye size={16} className="mr-2" /> {t("clients.view")}
+              </DropdownMenuItem>
+            )}
+            {onEdit && (
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={(e) => handleMenuItemClick(e, client.id, onEdit)}
+              >
+                <Edit size={16} className="mr-2" /> {t("clients.edit")}
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="text-destructive cursor-pointer"
+                  onClick={(e) => handleMenuItemClick(e, client.id, onDelete)}
+                >
+                  <Trash size={16} className="mr-2" /> {t("clients.delete")}
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),

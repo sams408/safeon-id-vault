@@ -14,7 +14,10 @@ export const es = {
     dashboard: "Panel",
     loading: "Cargando...",
     noResultsFound: "No se encontraron resultados",
-    noDataAvailable: "No hay datos disponibles"
+    noDataAvailable: "No hay datos disponibles",
+    cancel: "Cancelar",
+    delete: "Eliminar",
+    deleting: "Eliminando..."
   },
   sidebar: {
     dashboard: "Panel",
@@ -47,6 +50,8 @@ export const es = {
     errorLoadingClients: "No se pudieron cargar los clientes",
     errorDeletingClient: "No se pudo eliminar el cliente",
     clientDeleted: "Cliente eliminado",
-    clientDeletedDescription: "El cliente ha sido eliminado correctamente"
+    clientDeletedDescription: "El cliente ha sido eliminado correctamente",
+    deleteConfirmTitle: "¿Estás seguro?",
+    deleteConfirmDescription: "Esta acción no se puede deshacer. Esto eliminará permanentemente el cliente \"{{name}}\" y todos sus datos asociados."
   }
 };
