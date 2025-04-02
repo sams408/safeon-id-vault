@@ -12,15 +12,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Create and export Supabase client
 export const supabase = createClient(
-  supabaseUrl || 'https://supabase.co',
-  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cXdjb2diYnpjcWp3Z2pteXN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIwODA4ODYsImV4cCI6MjAyNzY1Njg4Nn0.Nf0PsK58VpJSQ5qZd-YukvCGaCPkXb-UQwZ1l8L4cCQ'
+  supabaseUrl || '',
+  supabaseAnonKey || ''
 );
 
 // Add a simple test function to check connection
 export const testSupabaseConnection = async () => {
   try {
     const { data, error } = await supabase.from('clients').select('count', { count: 'exact', head: true });
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase connection failed:', error);
+      return false;
+    }
     console.log('Supabase connection successful');
     return true;
   } catch (error) {

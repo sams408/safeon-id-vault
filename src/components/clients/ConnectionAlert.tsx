@@ -18,7 +18,8 @@ export const ConnectionAlert = ({ visible }: ConnectionAlertProps) => {
       <AlertTriangle className="h-5 w-5" />
       <AlertTitle>Error de conexión</AlertTitle>
       <AlertDescription>
-        No se pudo conectar a Supabase. Verifique que su URL y clave de Supabase sean correctas en el archivo .env.
+        No se pudo conectar a Supabase. Verifique que su URL y clave de Supabase sean correctas en el archivo .env. 
+        La URL debe tener el formato: https://tu-proyecto-id.supabase.co
       </AlertDescription>
     </Alert>
   );
