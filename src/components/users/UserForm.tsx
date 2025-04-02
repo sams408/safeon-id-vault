@@ -137,6 +137,28 @@ export const UserForm = ({ onUserCreated, onCancel }: UserFormProps) => {
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-4 py-4">
+          {/* Cliente field moved to the top */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="client" className="text-right">
+              Cliente
+            </Label>
+            <Select 
+              value={newUser.client_id} 
+              onValueChange={handleClientChange}
+              disabled={isLoadingClients}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Seleccione un cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
               Nombre
@@ -163,27 +185,6 @@ export const UserForm = ({ onUserCreated, onCancel }: UserFormProps) => {
               className="col-span-3"
               required
             />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="client" className="text-right">
-              Cliente
-            </Label>
-            <Select 
-              value={newUser.client_id} 
-              onValueChange={handleClientChange}
-              disabled={isLoadingClients}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Seleccione un cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
