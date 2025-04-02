@@ -7,7 +7,7 @@ import { useSidebar } from "@/components/layouts/sidebar-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const DashboardLayout = () => {
-  const { expanded, userInfo } = useSidebar();
+  const { expanded, setUserInfo } = useSidebar();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -17,8 +17,16 @@ const DashboardLayout = () => {
     if (!storedUser) {
       // If no user is found, redirect to login
       navigate("/login");
+    } else {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUserInfo(userData);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        navigate("/login");
+      }
     }
-  }, [navigate]);
+  }, [navigate, setUserInfo]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

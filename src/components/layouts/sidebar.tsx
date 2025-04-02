@@ -14,10 +14,12 @@ import {
   X
 } from "lucide-react";
 import { useSidebar } from "@/components/layouts/sidebar-provider";
+import { useLanguage } from "@/i18n/language-provider";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -48,22 +50,29 @@ const SidebarItem = ({ icon: Icon, label, path, active, expanded, isMobile }: Si
 
 const Sidebar = () => {
   const { expanded, toggleSidebar, openMobile, setOpenMobile } = useSidebar();
+  const { t } = useLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
   const isMobile = useIsMobile();
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   const mainLinks = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-    { icon: Users, label: "Clientes", path: "/clients" },
-    { icon: Users, label: "Usuarios", path: "/users" },
-    { icon: Package, label: "Ítems", path: "/products" },
-    { icon: Tags, label: "Categorías", path: "/categories" },
+    { icon: LayoutDashboard, label: t("sidebar.dashboard"), path: "/" },
+    { icon: Users, label: t("sidebar.clients"), path: "/clients" },
+    { icon: Users, label: t("sidebar.users"), path: "/users" },
+    { icon: Package, label: t("sidebar.items"), path: "/products" },
+    { icon: Tags, label: t("sidebar.categories"), path: "/categories" },
   ];
 
   const otherLinks = [
-    { icon: BarChart3, label: "Reportes", path: "/reports" },
-    { icon: Shield, label: "Seguridad", path: "/security" },
-    { icon: Settings, label: "Configuración", path: "/settings" },
+    { icon: BarChart3, label: t("sidebar.reports"), path: "/reports" },
+    { icon: Shield, label: t("sidebar.security"), path: "/security" },
+    { icon: Settings, label: t("sidebar.settings"), path: "/settings" },
   ];
 
   const SidebarContent = () => (
@@ -133,7 +142,7 @@ const Sidebar = () => {
         </div>
 
         <div className="mt-6">
-          {(expanded || isMobile) && <p className="text-xs font-medium text-gray-400 px-7 mb-2">SISTEMA</p>}
+          {(expanded || isMobile) && <p className="text-xs font-medium text-gray-400 px-7 mb-2">{t("sidebar.system")}</p>}
           <div className="space-y-1">
             {otherLinks.map((link) => (
               <SidebarItem 
@@ -154,12 +163,15 @@ const Sidebar = () => {
         "border-t border-gray-200 p-4",
         expanded || isMobile ? "" : "flex justify-center"
       )}>
-        <button className={cn(
-          "flex items-center text-gray-600 hover:text-gray-900 transition-colors",
-          expanded || isMobile ? "" : "justify-center"
-        )}>
+        <button 
+          onClick={handleLogout}
+          className={cn(
+            "flex items-center text-gray-600 hover:text-gray-900 transition-colors",
+            expanded || isMobile ? "" : "justify-center"
+          )}
+        >
           <LogOut size={isMobile ? 18 : 20} className={expanded || isMobile ? "mr-3" : ""} />
-          {(expanded || isMobile) && <span>Cerrar sesión</span>}
+          {(expanded || isMobile) && <span>{t("sidebar.logout")}</span>}
         </button>
       </div>
     </>

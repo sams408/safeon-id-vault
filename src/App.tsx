@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import { LanguageProvider } from "@/i18n/language-provider";
 import { SidebarProvider } from "@/components/layouts/sidebar-provider";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import Dashboard from "@/pages/dashboard";
@@ -37,26 +38,28 @@ function App() {
         <Toaster />
         <Sonner />
         <ErrorBoundary>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/registro" element={<Registro />} />
-              <Route path="/" element={
-                <SidebarProvider>
-                  <DashboardLayout />
-                </SidebarProvider>
-              }>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="clients" element={<Clients />} />
-                <Route path="users" element={<Users />} />
-                <Route path="products" element={<Products />} />
-                <Route path="categories" element={<Categories />} />
-                <Route path="profile" element={<Profile />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <LanguageProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Registro />} />
+                <Route path="/" element={
+                  <SidebarProvider>
+                    <DashboardLayout />
+                  </SidebarProvider>
+                }>
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="clients" element={<Clients />} />
+                  <Route path="users" element={<Users />} />
+                  <Route path="products" element={<Products />} />
+                  <Route path="categories" element={<Categories />} />
+                  <Route path="profile" element={<Profile />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </LanguageProvider>
         </ErrorBoundary>
       </TooltipProvider>
     </QueryClientProvider>

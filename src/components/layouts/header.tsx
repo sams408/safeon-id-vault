@@ -1,5 +1,6 @@
 
 import { useSidebar } from "@/components/layouts/sidebar-provider";
+import { useLanguage } from "@/i18n/language-provider";
 import { Search, Bell, ChevronDown, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,21 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LanguageSelector from "./language-selector";
 
 const Header = () => {
-  const { expanded, toggleSidebar } = useSidebar();
+  const { expanded, toggleSidebar, userInfo } = useSidebar();
+  const { t } = useLanguage();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
-
-  // This would normally come from your auth context or state
-  // For now using a placeholder, will be replaced with actual user data
-  const userInfo = {
-    name: "Admin User",
-    email: "admin@safeon.com",
-    role: "Administrador",
-    initials: "AU"
-  };
 
   const handleViewProfile = () => {
     setProfileOpen(false);
@@ -38,6 +32,7 @@ const Header = () => {
 
   const handleSignOut = () => {
     setProfileOpen(false);
+    localStorage.removeItem("user");
     setTimeout(() => navigate("/login"), 100);
   };
 
@@ -56,8 +51,10 @@ const Header = () => {
           </Button>
         )}
         <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Compañía</h1>
-          <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Bienvenido, {userInfo.name}. Este es el resumen de tu plataforma SafeOn.</p>
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">{t("common.company")}</h1>
+          <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">
+            {t("common.welcome")}, {userInfo?.name || "Admin"}. {t("common.dashboard")}.
+          </p>
         </div>
       </div>
       
@@ -66,10 +63,12 @@ const Header = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <Input 
             type="search" 
-            placeholder="Buscar..." 
+            placeholder={t("common.search")}
             className="pl-10 w-40 lg:w-64 bg-gray-50 border-gray-200"
           />
         </div>
+        
+        <LanguageSelector />
         
         <Button size="icon" variant="ghost" className="relative">
           <Bell size={20} />
@@ -81,25 +80,25 @@ const Header = () => {
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-safeon-600 text-white">
-                  {userInfo.initials}
+                  {userInfo?.name?.split(' ').map(n => n[0]).join('').substring(0, 2) || "AU"}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden md:inline text-sm font-medium">{userInfo.name}</span>
+              <span className="hidden md:inline text-sm font-medium">{userInfo?.name || "Admin User"}</span>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 z-50">
-            <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("common.myAccount")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleViewProfile} className="cursor-pointer">
-              Ver perfil
+              {t("common.viewProfile")}
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">
-              Configuración
+              {t("common.settings")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
-              Cerrar sesión
+              {t("common.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

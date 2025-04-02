@@ -14,6 +14,7 @@ type SidebarContextType = {
   openMobile: boolean;
   setOpenMobile: (value: boolean) => void;
   userInfo: UserInfo | null;
+  setUserInfo: (user: UserInfo) => void;
 };
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -71,7 +72,8 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
         toggleSidebar, 
         openMobile, 
         setOpenMobile,
-        userInfo
+        userInfo,
+        setUserInfo
       }}
     >
       {children}
