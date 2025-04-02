@@ -18,9 +18,18 @@ interface ProductsTableProps {
   isLoading: boolean;
   onAddNew: () => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string) => void;
+  onView: (id: string) => void;
 }
 
-export const ProductsTable = ({ products, isLoading, onAddNew, onDelete }: ProductsTableProps) => {
+export const ProductsTable = ({ 
+  products, 
+  isLoading, 
+  onAddNew, 
+  onDelete,
+  onEdit,
+  onView
+}: ProductsTableProps) => {
   const columns: Column<Product>[] = [
     {
       header: "Nombre",
@@ -66,10 +75,10 @@ export const ProductsTable = ({ products, isLoading, onAddNew, onDelete }: Produ
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onView(product.id)}>
               <Eye size={16} className="mr-2" /> Ver detalles
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(product.id)}>
               <Edit size={16} className="mr-2" /> Editar
             </DropdownMenuItem>
             <DropdownMenuSeparator />

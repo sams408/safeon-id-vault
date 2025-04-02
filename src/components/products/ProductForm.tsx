@@ -1,21 +1,15 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { createProduct } from "@/services/products";
+import { createProduct, updateProduct, Product } from "@/services/products";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Save } from "lucide-react";
+import { Save, Edit } from "lucide-react";
 import { ClientSelect } from "@/components/users/ClientSelect";
 import { CategorySelect } from "@/components/categories/CategorySelect";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { fetchCategories } from "@/services/categories";
 
 type ProductFormData = {
@@ -27,22 +21,47 @@ type ProductFormData = {
   created_by: string;
 };
 
-type ProductFormProps = {
+interface ProductFormProps {
   onProductCreated: () => Promise<void>;
   onCancel: () => void;
-};
+  initialProduct?: Product | null;
+  isEditMode?: boolean;
+}
 
-export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) => {
-  const [newProduct, setNewProduct] = useState<ProductFormData>({
+export const ProductForm = ({ 
+  onProductCreated, 
+  onCancel,
+  initialProduct = null,
+  isEditMode = false
+}: ProductFormProps) => {
+  const { toast } = useToast();
+  const defaultProductData: ProductFormData = {
     name: "",
     description: "",
     client_id: "",
     category_id: "default",
-    category: "Default", 
-    created_by: "admin", // Default value
-  });
+    category: "Default",
+    created_by: "admin",
+  };
+
+  const [newProduct, setNewProduct] = useState<ProductFormData>(defaultProductData);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+
+  // Initialize form data with product if in edit mode
+  useEffect(() => {
+    if (isEditMode && initialProduct) {
+      setNewProduct({
+        name: initialProduct.name,
+        description: initialProduct.description || "",
+        client_id: initialProduct.client_id,
+        category_id: initialProduct.category_id || "default",
+        category: initialProduct.category || "Default",
+        created_by: initialProduct.created_by,
+      });
+    } else {
+      setNewProduct(defaultProductData);
+    }
+  }, [isEditMode, initialProduct]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,35 +105,41 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
     if (!newProduct.name || !newProduct.client_id) {
       toast({
         title: "Error",
-        description: "Por favor complete los campos requeridos",
+        description: "Por favor, complete todos los campos obligatorios",
         variant: "destructive",
       });
       return;
     }
-    
+
+    setIsSubmitting(true);
+
     try {
-      setIsSubmitting(true);
-      console.log("Sending product data:", newProduct);
+      if (isEditMode && initialProduct) {
+        await updateProduct(initialProduct.id, newProduct);
+        toast({
+          title: "Éxito",
+          description: "Ítem actualizado correctamente",
+        });
+      } else {
+        await createProduct(newProduct);
+        toast({
+          title: "Éxito",
+          description: "Ítem creado correctamente",
+        });
+      }
       
-      await createProduct(newProduct);
-      
-      // Show success notification
-      toast({
-        title: "Éxito",
-        description: "Ítem creado correctamente",
-      });
-      
-      // Reload the product list to show the new product
       await onProductCreated();
+      setNewProduct(defaultProductData);
     } catch (error) {
-      console.error("Error creating product:", error);
+      console.error("Error saving product:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear el ítem",
+        description: isEditMode 
+          ? "No se pudo actualizar el ítem" 
+          : "No se pudo crear el ítem",
         variant: "destructive",
       });
     } finally {
@@ -123,85 +148,77 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Crear nuevo ítem</DialogTitle>
-        <DialogDescription>
-          Complete el formulario para crear un nuevo ítem
-        </DialogDescription>
-      </DialogHeader>
-
-      <form onSubmit={handleSubmit}>
-        <div className="grid gap-4 py-4">
-          <ClientSelect 
-            value={newProduct.client_id} 
-            onValueChange={handleClientChange}
+    <form onSubmit={handleSubmit}>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">
+            Nombre
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            value={newProduct.name}
+            onChange={handleInputChange}
+            className="col-span-3"
+            required
           />
-          
-          <CategorySelect 
-            value={newProduct.category_id}
-            onValueChange={handleCategoryChange}
-          />
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nombre
-            </Label>
-            <Input
-              id="name"
-              name="name"
-              value={newProduct.name}
-              onChange={handleInputChange}
-              className="col-span-3"
-              required
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Descripción
-            </Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={newProduct.description}
-              onChange={handleInputChange}
-              className="col-span-3"
-              rows={3}
-            />
-          </div>
         </div>
         
-        <DialogFooter>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Guardando...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Guardar
-              </span>
-            )}
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="description" className="text-right">
+            Descripción
+          </Label>
+          <Textarea
+            id="description"
+            name="description"
+            value={newProduct.description}
+            onChange={handleInputChange}
+            className="col-span-3"
+            rows={3}
+          />
+        </div>
+        
+        <ClientSelect 
+          value={newProduct.client_id} 
+          onValueChange={handleClientChange}
+        />
+        
+        <CategorySelect 
+          value={newProduct.category_id}
+          onValueChange={handleCategoryChange}
+        />
+        
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="created_by" className="text-right">
+            Creado por
+          </Label>
+          <Input
+            id="created_by"
+            name="created_by"
+            value={newProduct.created_by}
+            onChange={handleInputChange}
+            className="col-span-3"
+            required
+          />
+        </div>
+      </div>
+      
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isEditMode ? (
+            <>
+              <Edit className="mr-2 h-4 w-4" /> Actualizar
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" /> Guardar
+            </>
+          )}
+        </Button>
+      </DialogFooter>
+    </form>
   );
 };
