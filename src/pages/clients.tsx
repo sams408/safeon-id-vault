@@ -28,10 +28,10 @@ const Clients = () => {
   const testSupabaseConnection = async () => {
     try {
       // First try a simple query to test the connection
-      // Using select() without parameters to avoid type errors
+      // Use select() without parameters to avoid type errors
       const { error: clientsError } = await supabase
         .from('clients')
-        .select('*', { count: 'exact', head: true });
+        .select();
       
       if (clientsError) {
         console.error('Clients table connection failed:', clientsError);
