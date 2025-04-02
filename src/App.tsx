@@ -13,6 +13,8 @@ import Users from "@/pages/users";
 import Products from "@/pages/products";
 import Categories from "@/pages/categories";
 import NotFound from "@/pages/NotFound";
+import Login from "@/pages/login";
+import Registro from "@/pages/registro";
 
 // Create a new QueryClient instance for React Query
 const queryClient = new QueryClient({
@@ -32,18 +34,22 @@ function App() {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <SidebarProvider>
-            <Routes>
-              <Route path="/" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="clients" element={<Clients />} />
-                <Route path="users" element={<Users />} />
-                <Route path="products" element={<Products />} />
-                <Route path="categories" element={<Categories />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SidebarProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
+            <Route path="/" element={
+              <SidebarProvider>
+                <DashboardLayout />
+              </SidebarProvider>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="clients" element={<Clients />} />
+              <Route path="users" element={<Users />} />
+              <Route path="products" element={<Products />} />
+              <Route path="categories" element={<Categories />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
