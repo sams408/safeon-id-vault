@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, Eye, MoreHorizontal } from "lucide-react";
+import { Edit, Trash, Eye, MoreHorizontal, Save } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +35,7 @@ const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newClient, setNewClient] = useState<{
     name: string;
     email: string;
@@ -96,14 +96,32 @@ const Clients = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validación básica
+    if (!newClient.name || !newClient.email || !newClient.phone) {
+      toast({
+        title: "Error",
+        description: "Por favor complete todos los campos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
+      setIsSubmitting(true);
       await createClient(newClient);
+      
+      // Reset form and close dialog
+      setIsDialogOpen(false);
+      
+      // Show success notification
       toast({
         title: "Éxito",
         description: "Cliente creado correctamente",
       });
-      setIsDialogOpen(false);
-      loadClients();
+      
+      // Reload the client list to show the new client
+      await loadClients();
     } catch (error) {
       console.error("Error creating client:", error);
       toast({
@@ -111,6 +129,8 @@ const Clients = () => {
         description: "No se pudo crear el cliente",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -251,10 +271,33 @@ const Clients = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSubmitting}
+              >
                 Cancelar
               </Button>
-              <Button type="submit">Guardar</Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Guardando...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Save className="h-4 w-4" />
+                    Guardar
+                  </span>
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
