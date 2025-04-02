@@ -87,12 +87,17 @@ const Users = () => {
         />
       </Dialog>
 
-      <UserDeleteDialog
-        userId={selectedUserId}
-        isOpen={isDeleteDialogOpen}
+      <Dialog 
+        open={isDeleteDialogOpen && selectedUserId !== null} 
         onOpenChange={setIsDeleteDialogOpen}
-        onUserDeleted={loadUsers}
-      />
+      >
+        <UserDeleteDialog
+          userId={selectedUserId}
+          isOpen={isDeleteDialogOpen && selectedUserId !== null}
+          onOpenChange={setIsDeleteDialogOpen}
+          onUserDeleted={loadUsers}
+        />
+      </Dialog>
     </div>
   );
 };
