@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, MoreHorizontal } from "lucide-react";
+import { Edit, Trash, MoreHorizontal, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,35 +12,56 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { fetchCategories, Category } from "@/services/categories";
+import { fetchCategories, Category, deleteCategory } from "@/services/categories";
+import { CategoryDialog } from "@/components/categories/CategoryDialog";
 
 const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await fetchCategories();
-        setCategories(data);
-      } catch (error) {
-        console.error("Error loading categories:", error);
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar las categorías",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadCategories = async () => {
+    try {
+      setIsLoading(true);
+      const data = await fetchCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las categorías",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadCategories();
   }, [toast]);
 
   const handleAddCategory = () => {
-    console.log("Add new category");
+    setDialogOpen(true);
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      await deleteCategory(id);
+      toast({
+        title: "Categoría eliminada",
+        description: "La categoría se ha eliminado correctamente",
+      });
+      loadCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la categoría",
+        variant: "destructive",
+      });
+    }
   };
 
   const columns: Column<Category>[] = [
@@ -69,7 +90,10 @@ const Categories = () => {
               <Edit size={16} className="mr-2" /> Editar
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={() => handleDeleteCategory(category.id)}
+            >
               <Trash size={16} className="mr-2" /> Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -87,6 +111,14 @@ const Categories = () => {
         searchPlaceholder="Buscar categorías..."
         onAddNew={handleAddCategory}
         isLoading={isLoading}
+        addButtonIcon={<Plus className="mr-2" size={16} />}
+        addButtonText="Nuevo"
+      />
+      
+      <CategoryDialog 
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onCategoryCreated={loadCategories}
       />
     </div>
   );

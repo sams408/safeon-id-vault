@@ -7,39 +7,39 @@ export interface Category {
   product_count?: number;
 }
 
-// Simple implementation until categories table is created
 export const fetchCategories = async (): Promise<Category[]> => {
   try {
     console.log('Fetching categories...');
     
-    // Create mock categories based on clients
-    const { data: clients, error } = await supabase
-      .from('clients')
-      .select('*');
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name');
 
     if (error) {
-      console.error('Error fetching data for categories:', error);
+      console.error('Error fetching categories:', error);
       throw error;
     }
 
-    // Create a set of sample categories
-    const sampleCategories: Category[] = [
-      { id: '1', name: 'Technology', product_count: 0 },
-      { id: '2', name: 'Healthcare', product_count: 0 },
-      { id: '3', name: 'Education', product_count: 0 },
-      { id: '4', name: 'Finance', product_count: 0 }
-    ];
+    // For each category, count the number of products
+    const categoriesWithCounts = await Promise.all(
+      (data || []).map(async (category) => {
+        const { count, error: countError } = await supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true })
+          .eq('category_id', category.id);
+        
+        if (countError) {
+          console.error('Error counting products:', countError);
+        }
 
-    // Distribute clients across categories to simulate product counts
-    if (clients && clients.length > 0) {
-      clients.forEach((client, index) => {
-        const categoryIndex = index % sampleCategories.length;
-        sampleCategories[categoryIndex].product_count = 
-          (sampleCategories[categoryIndex].product_count || 0) + 1;
-      });
-    }
+        return {
+          ...category,
+          product_count: count || 0
+        };
+      })
+    );
 
-    return sampleCategories;
+    return categoriesWithCounts;
   } catch (error) {
     console.error('Error in fetchCategories:', error);
     throw error;
@@ -48,15 +48,20 @@ export const fetchCategories = async (): Promise<Category[]> => {
 
 export const fetchCategoryById = async (id: string): Promise<Category | null> => {
   try {
-    // Get mock categories
-    const categories = await fetchCategories();
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('id', id)
+      .single();
     
-    // Find the requested category
-    const category = categories.find(c => c.id === id);
+    if (error) {
+      console.error('Error fetching category:', error);
+      throw error;
+    }
     
-    if (!category) return null;
+    if (!data) return null;
     
-    return category;
+    return data;
   } catch (error) {
     console.error('Error in fetchCategoryById:', error);
     throw error;
@@ -65,18 +70,18 @@ export const fetchCategoryById = async (id: string): Promise<Category | null> =>
 
 export const createCategory = async (category: Omit<Category, 'id' | 'product_count'>): Promise<Category> => {
   try {
-    // In a real implementation, we would insert into the categories table
-    console.log('Creating mock category:', category.name);
+    const { data, error } = await supabase
+      .from('categories')
+      .insert(category)
+      .select()
+      .single();
     
-    // Generate a random ID
-    const id = Math.random().toString(36).substring(2, 9);
+    if (error) {
+      console.error('Error creating category:', error);
+      throw error;
+    }
     
-    // Return a mock category
-    return {
-      id,
-      name: category.name,
-      product_count: 0
-    };
+    return { ...data, product_count: 0 };
   } catch (error) {
     console.error('Error in createCategory:', error);
     throw error;
@@ -85,25 +90,29 @@ export const createCategory = async (category: Omit<Category, 'id' | 'product_co
 
 export const updateCategory = async (id: string, category: Partial<Omit<Category, 'id' | 'product_count'>>): Promise<Category> => {
   try {
-    // Get mock categories
-    const categories = await fetchCategories();
+    const { data, error } = await supabase
+      .from('categories')
+      .update(category)
+      .eq('id', id)
+      .select()
+      .single();
     
-    // Find the requested category
-    const existingCategory = categories.find(c => c.id === id);
+    if (error) {
+      console.error('Error updating category:', error);
+      throw error;
+    }
+
+    // Get current product count
+    const { count, error: countError } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true })
+      .eq('category_id', id);
     
-    if (!existingCategory) {
-      throw new Error(`Category with ID ${id} not found`);
+    if (countError) {
+      console.error('Error counting products:', countError);
     }
     
-    // Update category name if provided
-    const updatedCategory = {
-      ...existingCategory,
-      name: category.name || existingCategory.name
-    };
-    
-    console.log('Updated mock category:', updatedCategory);
-    
-    return updatedCategory;
+    return { ...data, product_count: count || 0 };
   } catch (error) {
     console.error('Error in updateCategory:', error);
     throw error;
@@ -112,8 +121,15 @@ export const updateCategory = async (id: string, category: Partial<Omit<Category
 
 export const deleteCategory = async (id: string): Promise<void> => {
   try {
-    // In a real implementation, we would delete from the categories table
-    console.log(`Simulating deletion of category with ID: ${id}`);
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting category:', error);
+      throw error;
+    }
   } catch (error) {
     console.error('Error in deleteCategory:', error);
     throw error;
