@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/i18n/language-provider"; 
 import { 
   fetchClients, 
   Client, 
@@ -22,6 +23,7 @@ export function ClientsPageContent() {
   const [isEditing, setIsEditing] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadClients();
@@ -37,8 +39,8 @@ export function ClientsPageContent() {
       console.error("Error loading clients:", error);
       setConnectionError(true);
       toast({
-        title: "Error",
-        description: "No se pudieron cargar los clientes",
+        title: t("clients.errorTitle"),
+        description: t("clients.errorLoadingClients"),
         variant: "destructive",
       });
     } finally {
@@ -84,15 +86,15 @@ export function ClientsPageContent() {
       await deleteClient(selectedClient.id);
       
       toast({
-        title: "Cliente eliminado",
-        description: "El cliente ha sido eliminado correctamente",
+        title: t("clients.clientDeleted"),
+        description: t("clients.clientDeletedDescription"),
       });
       
       await loadClients();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "No se pudo eliminar el cliente",
+        title: t("clients.errorTitle"),
+        description: t("clients.errorDeletingClient"),
         variant: "destructive",
       });
     } finally {

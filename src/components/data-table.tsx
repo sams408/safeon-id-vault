@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, PlusCircle, FilterX, Download, LucideIcon } from "lucide-react";
+import { useLanguage } from "@/i18n/language-provider";
 
 export interface Column<T> {
   header: string;
@@ -37,6 +38,7 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState<T[]>(data);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!searchQuery) {
@@ -116,13 +118,13 @@ export function DataTable<T>({
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-40 text-center">
-                  Cargando...
+                  {t("common.loading")}
                 </TableCell>
               </TableRow>
             ) : filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-40 text-center">
-                  {searchQuery ? "No se encontraron resultados" : "No hay datos disponibles"}
+                  {searchQuery ? t("common.noResultsFound") : t("common.noDataAvailable")}
                 </TableCell>
               </TableRow>
             ) : (

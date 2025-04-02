@@ -11,7 +11,10 @@ export const en = {
     search: "Search...",
     welcome: "Welcome",
     company: "Company",
-    dashboard: "Dashboard"
+    dashboard: "Dashboard",
+    loading: "Loading...",
+    noResultsFound: "No results found",
+    noDataAvailable: "No data available"
   },
   sidebar: {
     dashboard: "Dashboard",
@@ -31,9 +34,19 @@ export const en = {
     name: "Name",
     email: "Email",
     phone: "Phone",
+    status: "Status",
+    active: "Active",
+    inactive: "Inactive",
+    createdAt: "Creation date",
     actions: "Actions",
-    view: "View",
+    view: "View details",
     edit: "Edit",
-    delete: "Delete"
+    delete: "Delete",
+    searchPlaceholder: "Search clients...",
+    errorTitle: "Error",
+    errorLoadingClients: "Could not load clients",
+    errorDeletingClient: "Could not delete client",
+    clientDeleted: "Client deleted",
+    clientDeletedDescription: "The client has been successfully deleted"
   }
 };
