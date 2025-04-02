@@ -77,6 +77,10 @@ export const createCategory = async (category: Omit<Category, 'id' | 'product_co
       throw error;
     }
     
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from create_category');
+    }
+    
     return { ...data[0], product_count: 0 };
   } catch (error) {
     console.error('Error in createCategory:', error);
@@ -96,6 +100,10 @@ export const updateCategory = async (id: string, category: Partial<Omit<Category
     if (error) {
       console.error('Error updating category:', error);
       throw error;
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from update_category');
     }
 
     // Get current product count

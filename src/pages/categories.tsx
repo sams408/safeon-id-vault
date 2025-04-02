@@ -111,7 +111,7 @@ const Categories = () => {
         searchPlaceholder="Buscar categorías..."
         onAddNew={handleAddCategory}
         isLoading={isLoading}
-        icon={LayoutList}
+        icon={<LayoutList />}
         addButtonIcon={<Plus className="mr-2" size={16} />}
         addButtonText="Nueva categoría"
       />
