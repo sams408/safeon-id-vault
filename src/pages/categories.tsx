@@ -51,7 +51,7 @@ const Categories = () => {
     setDialogOpen(true);
   };
 
-  const handleEditCategory = (category: Category, e: React.MouseEvent) => {
+  const handleEditCategory = (category: Category, e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -60,7 +60,7 @@ const Categories = () => {
     // Implementation for editing will go here
   };
 
-  const handleDeleteCategory = (category: Category, e: React.MouseEvent) => {
+  const handleDeleteCategory = (category: Category, e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -94,9 +94,14 @@ const Categories = () => {
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 p-0 focus:outline-none"
-                onClick={(e) => e.stopPropagation()}
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={(e) => {
+                  if (e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
               >
                 <MoreHorizontal size={16} />
                 <span className="sr-only">{t("categories.actions")}</span>
@@ -104,20 +109,29 @@ const Categories = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="end" 
-              className="w-[160px] bg-white dark:bg-gray-800 shadow-md z-50 overflow-visible" 
+              side="right"
+              className="w-[160px] bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 z-[100]" 
             >
               <DropdownMenuLabel>{t("categories.actions")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={(e) => handleEditCategory(item, e)}
-                className="cursor-pointer flex items-center text-sm px-2 py-1.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleEditCategory(item);
+                }}
+                className="cursor-pointer flex items-center text-sm px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <Edit size={16} className="mr-2 text-gray-500" /> {t("categories.edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                className="cursor-pointer flex items-center text-sm px-2 py-1.5 text-red-600 hover:text-red-700"
-                onClick={(e) => handleDeleteCategory(item, e)}
+                className="cursor-pointer flex items-center text-sm px-2 py-1.5 text-red-600 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleDeleteCategory(item);
+                }}
               >
                 <Trash size={16} className="mr-2" /> {t("categories.delete")}
               </DropdownMenuItem>
