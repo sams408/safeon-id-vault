@@ -25,29 +25,55 @@ export const UserActions = ({
   onPermissions,
   onDelete,
 }: UserActionsProps) => {
+  // Crear funciones separadas para manejar cada acción y evitar cierres inesperados
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onViewDetails(userId);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onEdit(userId);
+  };
+
+  const handlePermissions = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onPermissions(userId);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete(userId);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="h-8 w-8">
           <MoreHorizontal size={16} />
+          <span className="sr-only">Abrir menú</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onViewDetails(userId)}>
+        <DropdownMenuItem onClick={handleViewDetails}>
           <Eye size={16} className="mr-2" /> Ver detalles
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onEdit(userId)}>
+        <DropdownMenuItem onClick={handleEdit}>
           <Edit size={16} className="mr-2" /> Editar
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onPermissions(userId)}>
+        <DropdownMenuItem onClick={handlePermissions}>
           <Shield size={16} className="mr-2" /> Permisos
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="text-destructive"
-          onClick={() => onDelete(userId)}
+          onClick={handleDelete}
         >
           <Trash size={16} className="mr-2" /> Eliminar
         </DropdownMenuItem>
