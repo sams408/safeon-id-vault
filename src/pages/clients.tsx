@@ -36,7 +36,12 @@ const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newClient, setNewClient] = useState({
+  const [newClient, setNewClient] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    status: 'active' | 'inactive';
+  }>({
     name: "",
     email: "",
     phone: "",
@@ -83,7 +88,10 @@ const Clients = () => {
   };
 
   const handleStatusChange = (value: string) => {
-    setNewClient(prev => ({ ...prev, status: value as 'active' | 'inactive' }));
+    // Only assign if the value is 'active' or 'inactive'
+    if (value === 'active' || value === 'inactive') {
+      setNewClient(prev => ({ ...prev, status: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
