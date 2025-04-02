@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, Eye, MoreHorizontal } from "lucide-react";
+import { Edit, Trash, Eye, MoreHorizontal, Package } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,35 +13,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { fetchProducts, Product } from "@/services/products";
+import { fetchProducts, Product, createProduct } from "@/services/products";
+import { 
+  Dialog,
+  DialogTrigger 
+} from "@/components/ui/dialog";
+import { ProductForm } from "@/components/products/ProductForm";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error("Error loading products:", error);
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar los productos",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadProducts = async () => {
+    try {
+      setIsLoading(true);
+      const data = await fetchProducts();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error loading products:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los ítems",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadProducts();
   }, [toast]);
 
   const handleAddProduct = () => {
-    console.log("Add new product");
+    setDialogOpen(true);
+  };
+
+  const handleProductCreated = async () => {
+    await loadProducts();
+    setDialogOpen(false);
   };
 
   const columns: Column<Product>[] = [
@@ -110,11 +122,19 @@ const Products = () => {
       <DataTable
         columns={columns}
         data={products}
-        title="Productos"
-        searchPlaceholder="Buscar productos..."
+        title="Ítems"
+        searchPlaceholder="Buscar ítems..."
         onAddNew={handleAddProduct}
         isLoading={isLoading}
+        icon={Package}
       />
+      
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <ProductForm 
+          onProductCreated={handleProductCreated} 
+          onCancel={() => setDialogOpen(false)} 
+        />
+      </Dialog>
     </div>
   );
 };

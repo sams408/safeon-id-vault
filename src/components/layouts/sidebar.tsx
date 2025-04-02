@@ -1,9 +1,8 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
-  ShoppingBag, 
+  Package, 
   Tags, 
   ChevronLeft,
   ChevronRight,
@@ -50,7 +49,7 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     { icon: Users, label: "Clientes", path: "/clients" },
     { icon: Users, label: "Usuarios", path: "/users" },
-    { icon: ShoppingBag, label: "Productos", path: "/products" },
+    { icon: Package, label: "Ítems", path: "/products" },
     { icon: Tags, label: "Categorías", path: "/categories" },
   ];
 

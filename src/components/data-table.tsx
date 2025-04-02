@@ -2,7 +2,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PlusCircle, FilterX, Download } from "lucide-react";
+import { Search, PlusCircle, FilterX, Download, LucideIcon } from "lucide-react";
 
 export interface Column<T> {
   header: string;
@@ -17,6 +17,7 @@ interface DataTableProps<T> {
   searchPlaceholder?: string;
   onAddNew?: () => void;
   isLoading?: boolean;
+  icon?: LucideIcon;
 }
 
 export function DataTable<T>({
@@ -26,11 +27,15 @@ export function DataTable<T>({
   searchPlaceholder = "Buscar...",
   onAddNew,
   isLoading = false,
+  icon: Icon,
 }: DataTableProps<T>) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-2xl font-semibold">{title}</h2>
+        <h2 className="text-2xl font-semibold flex items-center">
+          {Icon && <Icon className="mr-2 text-primary" size={24} />}
+          {title}
+        </h2>
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 sm:flex-initial">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
