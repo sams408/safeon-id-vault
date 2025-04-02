@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { fetchClients, Client } from "@/services/clients";
-import { testSupabaseConnection } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 // Import our new components
 import { ClientsTable } from "@/components/clients/ClientsTable";
@@ -24,6 +24,21 @@ const Clients = () => {
       setConnectionError(!isConnected);
     });
   }, []);
+
+  const testSupabaseConnection = async () => {
+    try {
+      const { data, error } = await supabase.from('clients').select('count', { count: 'exact', head: true });
+      if (error) {
+        console.error('Supabase connection failed:', error);
+        return false;
+      }
+      console.log('Supabase connection successful');
+      return true;
+    } catch (error) {
+      console.error('Supabase connection failed:', error);
+      return false;
+    }
+  };
 
   const loadClients = async () => {
     try {

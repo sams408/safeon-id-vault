@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Client {
   id: string;
@@ -40,6 +40,8 @@ export const fetchClientById = async (id: string): Promise<Client | null> => {
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'created_at'>): Promise<Client> => {
+  console.log('Creating client with data:', client);
+  
   const { data, error } = await supabase
     .from('clients')
     .insert([client])
@@ -51,6 +53,7 @@ export const createClient = async (client: Omit<Client, 'id' | 'created_at'>): P
     throw error;
   }
 
+  console.log('Client created successfully:', data);
   return data;
 };
 

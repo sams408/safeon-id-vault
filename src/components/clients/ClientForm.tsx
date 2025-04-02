@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { testSupabaseConnection } from "@/lib/supabase";
 import { createClient } from "@/services/clients";
 
 import { Input } from "@/components/ui/input";
@@ -72,12 +71,7 @@ export const ClientForm = ({ onClientCreated, onCancel }: ClientFormProps) => {
     
     try {
       setIsSubmitting(true);
-      
-      // Test connection before attempting to create
-      const isConnected = await testSupabaseConnection();
-      if (!isConnected) {
-        throw new Error("No se pudo conectar a Supabase. Verifique su configuración.");
-      }
+      console.log("Enviando datos del cliente a Supabase:", newClient);
       
       await createClient(newClient);
       
