@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
@@ -12,61 +12,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: "active" | "inactive";
-  created_at: string;
-}
-
-const mockClients: Client[] = [
-  {
-    id: "1",
-    name: "Empresa ABC",
-    email: "contacto@empresaabc.com",
-    phone: "+57 300 123 4567",
-    status: "active",
-    created_at: "2023-05-15",
-  },
-  {
-    id: "2",
-    name: "Corporación XYZ",
-    email: "info@corporacionxyz.com",
-    phone: "+52 55 1234 5678",
-    status: "active",
-    created_at: "2023-06-22",
-  },
-  {
-    id: "3",
-    name: "Industrias 123",
-    email: "ventas@industrias123.com",
-    phone: "+57 318 987 6543",
-    status: "inactive",
-    created_at: "2023-03-10",
-  },
-  {
-    id: "4",
-    name: "Grupo Tecnológico",
-    email: "soporte@grupotec.com",
-    phone: "+52 55 9876 5432",
-    status: "active",
-    created_at: "2023-07-05",
-  },
-  {
-    id: "5",
-    name: "Servicios Integrales",
-    email: "contacto@serviciosintegrales.com",
-    phone: "+57 320 456 7890",
-    status: "active",
-    created_at: "2023-04-18",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { fetchClients, Client } from "@/services/clients";
 
 const Clients = () => {
-  const [clients] = useState<Client[]>(mockClients);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const data = await fetchClients();
+        setClients(data);
+      } catch (error) {
+        console.error("Error loading clients:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los clientes",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadClients();
+  }, [toast]);
 
   const handleAddClient = () => {
     console.log("Add new client");
@@ -97,6 +69,7 @@ const Clients = () => {
     {
       header: "Fecha de creación",
       accessorKey: "created_at",
+      cell: (client) => new Date(client.created_at).toLocaleDateString(),
     },
     {
       header: "Acciones",
@@ -135,6 +108,7 @@ const Clients = () => {
         title="Clientes"
         searchPlaceholder="Buscar clientes..."
         onAddNew={handleAddClient}
+        isLoading={isLoading}
       />
     </div>
   );

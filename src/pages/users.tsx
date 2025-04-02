@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
@@ -12,67 +12,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface User {
-  id: string;
-  client_name: string;
-  name: string;
-  email: string;
-  status: "active" | "inactive";
-  created_at: string;
-  created_by: string;
-}
-
-const mockUsers: User[] = [
-  {
-    id: "1",
-    client_name: "Empresa ABC",
-    name: "Juan Pérez",
-    email: "jperez@empresaabc.com",
-    status: "active",
-    created_at: "2023-05-20",
-    created_by: "Admin",
-  },
-  {
-    id: "2",
-    client_name: "Corporación XYZ",
-    name: "María López",
-    email: "mlopez@corporacionxyz.com",
-    status: "active",
-    created_at: "2023-06-25",
-    created_by: "Admin",
-  },
-  {
-    id: "3",
-    client_name: "Industrias 123",
-    name: "Carlos Rodríguez",
-    email: "crodriguez@industrias123.com",
-    status: "inactive",
-    created_at: "2023-03-15",
-    created_by: "Admin",
-  },
-  {
-    id: "4",
-    client_name: "Grupo Tecnológico",
-    name: "Ana Gómez",
-    email: "agomez@grupotec.com",
-    status: "active",
-    created_at: "2023-07-10",
-    created_by: "Admin",
-  },
-  {
-    id: "5",
-    client_name: "Servicios Integrales",
-    name: "Roberto Sánchez",
-    email: "rsanchez@serviciosintegrales.com",
-    status: "active",
-    created_at: "2023-04-22",
-    created_by: "Admin",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { fetchUsers, User } from "@/services/users";
 
 const Users = () => {
-  const [users] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await fetchUsers();
+        setUsers(data);
+      } catch (error) {
+        console.error("Error loading users:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los usuarios",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, [toast]);
 
   const handleAddUser = () => {
     console.log("Add new user");
@@ -103,6 +69,7 @@ const Users = () => {
     {
       header: "Creado el",
       accessorKey: "created_at",
+      cell: (user) => new Date(user.created_at).toLocaleDateString(),
     },
     {
       header: "Creado por",
@@ -148,6 +115,7 @@ const Users = () => {
         title="Usuarios"
         searchPlaceholder="Buscar usuarios..."
         onAddNew={handleAddUser}
+        isLoading={isLoading}
       />
     </div>
   );

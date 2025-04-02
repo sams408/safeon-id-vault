@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
@@ -12,67 +12,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  client_name: string;
-  category: string;
-  created_by: string;
-  created_at: string;
-}
-
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "Producto A",
-    description: "Descripción del producto A",
-    client_name: "Empresa ABC",
-    category: "Hardware",
-    created_by: "Admin",
-    created_at: "2023-06-10",
-  },
-  {
-    id: "2",
-    name: "Producto B",
-    description: "Descripción del producto B",
-    client_name: "Corporación XYZ",
-    category: "Software",
-    created_by: "Admin",
-    created_at: "2023-07-15",
-  },
-  {
-    id: "3",
-    name: "Producto C",
-    description: "Descripción del producto C",
-    client_name: "Industrias 123",
-    category: "Servicios",
-    created_by: "Admin",
-    created_at: "2023-04-05",
-  },
-  {
-    id: "4",
-    name: "Producto D",
-    description: "Descripción del producto D",
-    client_name: "Grupo Tecnológico",
-    category: "Hardware",
-    created_by: "Admin",
-    created_at: "2023-08-20",
-  },
-  {
-    id: "5",
-    name: "Producto E",
-    description: "Descripción del producto E",
-    client_name: "Servicios Integrales",
-    category: "Software",
-    created_by: "Admin",
-    created_at: "2023-05-12",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { fetchProducts, Product } from "@/services/products";
 
 const Products = () => {
-  const [products] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error loading products:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los productos",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [toast]);
 
   const handleAddProduct = () => {
     console.log("Add new product");
@@ -108,6 +74,7 @@ const Products = () => {
     {
       header: "Creado el",
       accessorKey: "created_at",
+      cell: (product) => new Date(product.created_at).toLocaleDateString(),
     },
     {
       header: "Acciones",
@@ -146,6 +113,7 @@ const Products = () => {
         title="Productos"
         searchPlaceholder="Buscar productos..."
         onAddNew={handleAddProduct}
+        isLoading={isLoading}
       />
     </div>
   );

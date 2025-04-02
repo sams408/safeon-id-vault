@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/data-table";
 import { Edit, Trash, MoreHorizontal } from "lucide-react";
@@ -11,43 +11,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Category {
-  id: string;
-  name: string;
-  product_count: number;
-}
-
-const mockCategories: Category[] = [
-  {
-    id: "1",
-    name: "Hardware",
-    product_count: 24,
-  },
-  {
-    id: "2",
-    name: "Software",
-    product_count: 36,
-  },
-  {
-    id: "3",
-    name: "Servicios",
-    product_count: 18,
-  },
-  {
-    id: "4",
-    name: "Consultoría",
-    product_count: 12,
-  },
-  {
-    id: "5",
-    name: "Mantenimiento",
-    product_count: 8,
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { fetchCategories, Category } from "@/services/categories";
 
 const Categories = () => {
-  const [categories] = useState<Category[]>(mockCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las categorías",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, [toast]);
 
   const handleAddCategory = () => {
     console.log("Add new category");
@@ -96,6 +86,7 @@ const Categories = () => {
         title="Categorías"
         searchPlaceholder="Buscar categorías..."
         onAddNew={handleAddCategory}
+        isLoading={isLoading}
       />
     </div>
   );
