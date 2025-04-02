@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ export interface Column<T> {
   header: string;
   accessorKey: keyof T;
   cell?: (item: T) => React.ReactNode;
+  searchable?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -33,6 +35,38 @@ export function DataTable<T>({
   addButtonIcon,
   addButtonText = "Nuevo",
 }: DataTableProps<T>) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState<T[]>(data);
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredData(data);
+      return;
+    }
+
+    const searchableColumns = columns.filter(column => column.searchable !== false);
+    
+    const filtered = data.filter(item => {
+      return searchableColumns.some(column => {
+        const value = item[column.accessorKey];
+        if (value === null || value === undefined) return false;
+        
+        const stringValue = String(value).toLowerCase();
+        return stringValue.includes(searchQuery.toLowerCase());
+      });
+    });
+
+    setFilteredData(filtered);
+  }, [searchQuery, data, columns]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -46,9 +80,15 @@ export function DataTable<T>({
             <Input
               placeholder={searchPlaceholder}
               className="pl-10 w-full sm:w-64"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
           </div>
-          <Button variant="outline" size="icon">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={clearSearch} 
+            disabled={!searchQuery}>
             <FilterX size={18} />
           </Button>
           <Button variant="outline" size="icon">
@@ -79,14 +119,14 @@ export function DataTable<T>({
                   Cargando...
                 </TableCell>
               </TableRow>
-            ) : data.length === 0 ? (
+            ) : filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-40 text-center">
-                  No hay datos disponibles
+                  {searchQuery ? "No se encontraron resultados" : "No hay datos disponibles"}
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((row, rowIndex) => (
+              filteredData.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((column, colIndex) => (
                     <TableCell key={colIndex}>

@@ -1,41 +1,56 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, Eye, MoreHorizontal, Shield } from "lucide-react";
-import { Dialog } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
-import { fetchUsers, User } from "@/services/users";
-import { UserForm } from "@/components/users/UserForm";
 
-const Users = () => {
-  const [users, setUsers] = useState<User[]>([]);
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  fetchClients, 
+  Client, 
+  deleteClient 
+} from "@/services/clients";
+import { ClientsTable } from "@/components/clients/ClientsTable";
+import { ClientForm } from "@/components/clients/ClientForm";
+import { 
+  Dialog, 
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ConnectionAlert } from "@/components/clients/ConnectionAlert";
+
+const Clients = () => {
+  const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadUsers();
+    loadClients();
   }, []);
 
-  const loadUsers = async () => {
+  const loadClients = async () => {
     try {
       setIsLoading(true);
-      const data = await fetchUsers();
-      setUsers(data);
+      const data = await fetchClients();
+      setClients(data);
     } catch (error) {
-      console.error("Error loading users:", error);
+      console.error("Error loading clients:", error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los usuarios",
+        description: "No se pudieron cargar los clientes",
         variant: "destructive",
       });
     } finally {
@@ -43,93 +58,154 @@ const Users = () => {
     }
   };
 
-  const handleAddUser = () => {
-    setIsDialogOpen(true);
-    console.log("Add new user");
+  const handleAddNew = () => {
+    setSelectedClient(null);
+    setIsEditing(false);
+    setIsFormDialogOpen(true);
   };
 
-  const columns: Column<User>[] = [
-    {
-      header: "Nombre",
-      accessorKey: "name",
-    },
-    {
-      header: "Cliente",
-      accessorKey: "client_name",
-    },
-    {
-      header: "Email",
-      accessorKey: "email",
-    },
-    {
-      header: "Estado",
-      accessorKey: "status",
-      cell: (user) => (
-        <Badge variant={user.status === "active" ? "success" : "secondary"}>
-          {user.status === "active" ? "Activo" : "Inactivo"}
-        </Badge>
-      ),
-    },
-    {
-      header: "Creado el",
-      accessorKey: "created_at",
-      cell: (user) => new Date(user.created_at).toLocaleDateString(),
-    },
-    {
-      header: "Creado por",
-      accessorKey: "created_by",
-    },
-    {
-      header: "Acciones",
-      accessorKey: "id",
-      cell: (user) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Eye size={16} className="mr-2" /> Ver detalles
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Edit size={16} className="mr-2" /> Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Shield size={16} className="mr-2" /> Permisos
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <Trash size={16} className="mr-2" /> Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
+  const handleView = (id: string) => {
+    const client = clients.find((c) => c.id === id);
+    if (client) {
+      setSelectedClient(client);
+      setIsViewDialogOpen(true);
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    const client = clients.find((c) => c.id === id);
+    if (client) {
+      setSelectedClient(client);
+      setIsEditing(true);
+      setIsFormDialogOpen(true);
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    const client = clients.find((c) => c.id === id);
+    if (client) {
+      setSelectedClient(client);
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedClient) return;
+    
+    try {
+      await deleteClient(selectedClient.id);
+      
+      toast({
+        title: "Cliente eliminado",
+        description: "El cliente ha sido eliminado correctamente",
+      });
+      
+      await loadClients();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el cliente",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  const handleClientSaved = async () => {
+    await loadClients();
+    setIsFormDialogOpen(false);
+  };
 
   return (
     <div className="space-y-6">
-      <DataTable
-        columns={columns}
-        data={users}
-        title="Usuarios"
-        searchPlaceholder="Buscar usuarios..."
-        onAddNew={handleAddUser}
-        isLoading={isLoading}
+      <ConnectionAlert />
+      
+      <ClientsTable 
+        clients={clients} 
+        isLoading={isLoading} 
+        onAddNew={handleAddNew}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <UserForm 
-          onUserCreated={loadUsers}
-          onCancel={() => setIsDialogOpen(false)}
+      {/* Form Dialog */}
+      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+        <ClientForm 
+          onClientSaved={handleClientSaved}
+          onCancel={() => setIsFormDialogOpen(false)}
+          initialClient={isEditing ? selectedClient : null}
+          isEditMode={isEditing}
         />
       </Dialog>
+
+      {/* View Dialog */}
+      {selectedClient && (
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Detalles del Cliente</DialogTitle>
+              <DialogDescription>
+                Información detallada del cliente
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="font-medium text-right">Nombre:</div>
+                <div className="col-span-3">{selectedClient.name}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="font-medium text-right">Email:</div>
+                <div className="col-span-3">{selectedClient.email}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="font-medium text-right">Teléfono:</div>
+                <div className="col-span-3">{selectedClient.phone}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="font-medium text-right">Estado:</div>
+                <div className="col-span-3">
+                  {selectedClient.status === "active" ? "Activo" : "Inactivo"}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="font-medium text-right">Fecha de creación:</div>
+                <div className="col-span-3">
+                  {new Date(selectedClient.created_at).toLocaleDateString()}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog 
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente el cliente
+              {selectedClient && ` "${selectedClient.name}"`} y todos sus datos asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
-export default Users;
+export default Clients;
