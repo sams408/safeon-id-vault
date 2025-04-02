@@ -52,15 +52,19 @@ const Categories = () => {
   };
 
   const handleEditCategory = (category: Category, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     console.log("Edit clicked for:", category.name);
     // Implementation for editing will go here
   };
 
   const handleDeleteCategory = (category: Category, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setSelectedCategory(category);
     setDeleteDialogOpen(true);
   };
@@ -91,24 +95,28 @@ const Categories = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="focus:ring-0 focus:ring-offset-0"
+                className="h-8 w-8 p-0 focus:outline-none"
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreHorizontal size={16} />
+                <span className="sr-only">{t("categories.actions")}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px] bg-background">
+            <DropdownMenuContent 
+              align="end" 
+              className="w-[160px] bg-white dark:bg-gray-800 shadow-md z-50 overflow-visible" 
+            >
               <DropdownMenuLabel>{t("categories.actions")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={(e) => handleEditCategory(item, e)}
-                className="cursor-pointer"
+                className="cursor-pointer flex items-center text-sm px-2 py-1.5"
               >
-                <Edit size={16} className="mr-2" /> {t("categories.edit")}
+                <Edit size={16} className="mr-2 text-gray-500" /> {t("categories.edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                className="text-destructive cursor-pointer"
+                className="cursor-pointer flex items-center text-sm px-2 py-1.5 text-red-600 hover:text-red-700"
                 onClick={(e) => handleDeleteCategory(item, e)}
               >
                 <Trash size={16} className="mr-2" /> {t("categories.delete")}
