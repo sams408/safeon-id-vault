@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { createProduct } from "@/services/products";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Save } from "lucide-react";
 import { ClientSelect } from "@/components/users/ClientSelect";
+import { CategorySelect } from "@/components/categories/CategorySelect";
 import {
   DialogContent,
   DialogDescription,
@@ -15,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { fetchCategories } from "@/services/categories";
 
 type ProductFormData = {
   name: string;
@@ -49,6 +51,36 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
 
   const handleClientChange = (value: string) => {
     setNewProduct(prev => ({ ...prev, client_id: value }));
+  };
+
+  const handleCategoryChange = async (categoryId: string) => {
+    try {
+      if (categoryId === "default") {
+        setNewProduct(prev => ({ 
+          ...prev, 
+          category_id: categoryId,
+          category: "Default" 
+        }));
+        return;
+      }
+
+      // Fetch categories to get the category name
+      const categories = await fetchCategories();
+      const selectedCategory = categories.find(cat => cat.id === categoryId);
+      
+      setNewProduct(prev => ({ 
+        ...prev, 
+        category_id: categoryId,
+        category: selectedCategory ? selectedCategory.name : "Default" 
+      }));
+    } catch (error) {
+      console.error("Error handling category change:", error);
+      setNewProduct(prev => ({ 
+        ...prev, 
+        category_id: categoryId,
+        category: "Unknown" 
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,6 +136,11 @@ export const ProductForm = ({ onProductCreated, onCancel }: ProductFormProps) =>
           <ClientSelect 
             value={newProduct.client_id} 
             onValueChange={handleClientChange}
+          />
+          
+          <CategorySelect 
+            value={newProduct.category_id}
+            onValueChange={handleCategoryChange}
           />
           
           <div className="grid grid-cols-4 items-center gap-4">
