@@ -66,13 +66,24 @@ const Users = () => {
   const handleDeleteClick = (id: string) => {
     console.log("Delete user:", id);
     setSelectedUserId(id);
-    setIsDeleteDialogOpen(true);
+    // Use setTimeout to ensure this runs outside of the current event cycle
+    setTimeout(() => {
+      setIsDeleteDialogOpen(true);
+    }, 50);
   };
 
   const handleCloseDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     // Esperar un momento antes de limpiar el ID del usuario seleccionado
     // Esto evita problemas de renderizado durante la animación de cierre
+    setTimeout(() => {
+      setSelectedUserId(null);
+    }, 300);
+  };
+  
+  const handleCloseFormDialog = () => {
+    setIsDialogOpen(false);
+    // Clean up the selected user ID after dialog animation completes
     setTimeout(() => {
       setSelectedUserId(null);
     }, 300);
@@ -90,7 +101,7 @@ const Users = () => {
         onDelete={handleDeleteClick}
       />
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleCloseFormDialog}>
         <UserForm 
           onUserCreated={loadUsers}
           onCancel={() => setIsDialogOpen(false)}

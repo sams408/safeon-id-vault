@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -26,6 +26,13 @@ export const UserDeleteDialog = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsDeleting(false);
+    }
+  }, [isOpen]);
+
   const handleDeleteConfirm = async () => {
     if (!userId) return;
     
@@ -46,7 +53,10 @@ export const UserDeleteDialog = ({
       });
     } finally {
       onOpenChange(false);
-      setIsDeleting(false);
+      // Delay resetting the deleting state to avoid UI jank during dialog close animation
+      setTimeout(() => {
+        setIsDeleting(false);
+      }, 300);
     }
   };
 
