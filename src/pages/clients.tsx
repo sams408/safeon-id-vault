@@ -28,7 +28,7 @@ const Clients = () => {
   const testSupabaseConnection = async () => {
     try {
       // First try a simple query to test the connection
-      // Avoid using select with specific parameters that might cause type errors
+      // Using select() without parameters to avoid type errors
       const { error: clientsError } = await supabase
         .from('clients')
         .select();
