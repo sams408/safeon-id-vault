@@ -14,6 +14,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Create and export Supabase client
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder-url.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
+  supabaseUrl || 'https://example.supabase.co',
+  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MTY1MDI5OTgsImV4cCI6MTkzMjA3ODk5OH0.placeholder'
 );
