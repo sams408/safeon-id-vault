@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +27,7 @@ const Clients = () => {
   const testSupabaseConnection = async () => {
     try {
       // First try a simple query to test the connection
-      // Use select() without parameters to avoid type errors
+      // Don't pass any parameters to select() to avoid type errors
       const { error: clientsError } = await supabase
         .from('clients')
         .select();
