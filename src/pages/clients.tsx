@@ -27,18 +27,26 @@ const Clients = () => {
 
   const testSupabaseConnection = async () => {
     try {
-      // Use a raw query to check connection instead of a table query
-      const { data, error } = await supabase.rpc('get_client_count');
+      // First try a simple query to the clients table
+      const { error: clientsError } = await supabase.from('clients').select('id', { count: 'exact', head: true });
       
-      if (error) {
-        console.error('Supabase connection failed:', error);
-        // Try a simpler query as fallback
-        const { error: fallbackError } = await supabase.from('clients').select('id', { count: 'exact', head: true });
-        if (fallbackError) {
-          console.error('Fallback connection test failed:', fallbackError);
-          return false;
-        }
+      if (clientsError) {
+        console.error('Clients table connection failed:', clientsError);
+        return false;
       }
+      
+      // Try to call the get_client_count function if it exists
+      try {
+        const { error: rpcError } = await supabase.rpc('get_client_count');
+        if (rpcError) {
+          console.error('RPC function call failed (expected if not created yet):', rpcError);
+          // Continue even if this fails
+        }
+      } catch (rpcException) {
+        console.error('RPC exception (non-critical):', rpcException);
+        // Continue even if this fails
+      }
+      
       console.log('Supabase connection successful');
       return true;
     } catch (error) {

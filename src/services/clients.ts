@@ -22,7 +22,11 @@ export const fetchClients = async (): Promise<Client[]> => {
     throw error;
   }
 
-  return data || [];
+  // Ensure correct typing of status field
+  return (data || []).map(client => ({
+    ...client,
+    status: client.status as 'active' | 'inactive'
+  }));
 };
 
 export const fetchClientById = async (id: string): Promise<Client | null> => {
@@ -37,7 +41,13 @@ export const fetchClientById = async (id: string): Promise<Client | null> => {
     throw error;
   }
 
-  return data;
+  if (!data) return null;
+
+  // Ensure correct typing of status field
+  return {
+    ...data,
+    status: data.status as 'active' | 'inactive'
+  };
 };
 
 export const createClient = async (client: Omit<Client, 'id' | 'created_at'>): Promise<Client> => {
@@ -55,7 +65,12 @@ export const createClient = async (client: Omit<Client, 'id' | 'created_at'>): P
   }
 
   console.log('Client created successfully:', data);
-  return data;
+  
+  // Ensure correct typing of status field
+  return {
+    ...data,
+    status: data.status as 'active' | 'inactive'
+  };
 };
 
 export const updateClient = async (id: string, client: Partial<Omit<Client, 'id' | 'created_at'>>): Promise<Client> => {
@@ -71,7 +86,11 @@ export const updateClient = async (id: string, client: Partial<Omit<Client, 'id'
     throw error;
   }
 
-  return data;
+  // Ensure correct typing of status field
+  return {
+    ...data,
+    status: data.status as 'active' | 'inactive'
+  };
 };
 
 export const deleteClient = async (id: string): Promise<void> => {
