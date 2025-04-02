@@ -21,13 +21,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-safeon-500">
+    <div className="min-h-screen flex items-center justify-center bg-safeon-600">
       <div className="max-w-md w-full px-4">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">SafeOn</h1>
         </div>
 
-        <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <Card className="login-card">
           <CardContent className="p-6">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Bienvenido</h2>
@@ -84,7 +84,7 @@ const Login = () => {
 
               <Button 
                 type="submit" 
-                className="w-full py-2 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-md"
+                className="w-full py-2 px-4 bg-safeon-600 hover:bg-safeon-700 text-white font-medium rounded-md"
               >
                 Ingresar
               </Button>
@@ -93,7 +93,7 @@ const Login = () => {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 ¿No tienes cuenta?{" "}
-                <Link to="/registro" className="text-emerald-500 hover:text-emerald-700 font-medium">
+                <Link to="/registro" className="text-safeon-600 hover:text-safeon-700 font-medium">
                   Regístrate aquí
                 </Link>
               </p>
