@@ -16,14 +16,18 @@ export const fetchUsers = async (): Promise<User[]> => {
   try {
     console.log('Fetching users...');
     
-    // Fetch from the dedicated users table
+    // Fetch users and join with clients to get client names
     const { data, error } = await supabase
       .from('users')
       .select(`
-        *,
-        clients:client_id (
-          name
-        )
+        id,
+        name,
+        email,
+        client_id,
+        status,
+        created_at,
+        created_by,
+        clients(name)
       `)
       .order('created_at', { ascending: false });
 
@@ -54,10 +58,14 @@ export const fetchUserById = async (id: string): Promise<User | null> => {
     const { data, error } = await supabase
       .from('users')
       .select(`
-        *,
-        clients:client_id (
-          name
-        )
+        id,
+        name,
+        email,
+        client_id,
+        status,
+        created_at,
+        created_by,
+        clients(name)
       `)
       .eq('id', id)
       .single();
@@ -91,14 +99,25 @@ export const createUser = async (user: Omit<User, 'id' | 'created_at' | 'client_
     
     const { data, error } = await supabase
       .from('users')
-      .insert([{
-        name: user.name,
-        email: user.email,
-        client_id: user.client_id,
-        status: user.status,
-        created_by: user.created_by
-      }])
-      .select()
+      .insert([
+        {
+          name: user.name,
+          email: user.email,
+          client_id: user.client_id,
+          status: user.status,
+          created_by: user.created_by
+        }
+      ])
+      .select(`
+        id,
+        name,
+        email,
+        client_id,
+        status,
+        created_at,
+        created_by,
+        clients(name)
+      `)
       .single();
 
     if (error) {
@@ -111,6 +130,7 @@ export const createUser = async (user: Omit<User, 'id' | 'created_at' | 'client_
     return {
       id: data.id,
       client_id: data.client_id,
+      client_name: data.clients?.name,
       name: data.name,
       email: data.email,
       status: data.status as 'active' | 'inactive',
@@ -125,17 +145,27 @@ export const createUser = async (user: Omit<User, 'id' | 'created_at' | 'client_
 
 export const updateUser = async (id: string, user: Partial<Omit<User, 'id' | 'created_at' | 'client_name'>>): Promise<User> => {
   try {
+    const updateData: any = {};
+    if (user.name) updateData.name = user.name;
+    if (user.email) updateData.email = user.email;
+    if (user.client_id) updateData.client_id = user.client_id;
+    if (user.status) updateData.status = user.status;
+    if (user.created_by) updateData.created_by = user.created_by;
+
     const { data, error } = await supabase
       .from('users')
-      .update({
-        name: user.name,
-        email: user.email,
-        client_id: user.client_id,
-        status: user.status,
-        created_by: user.created_by
-      })
+      .update(updateData)
       .eq('id', id)
-      .select()
+      .select(`
+        id,
+        name,
+        email,
+        client_id,
+        status,
+        created_at,
+        created_by,
+        clients(name)
+      `)
       .single();
 
     if (error) {
@@ -146,6 +176,7 @@ export const updateUser = async (id: string, user: Partial<Omit<User, 'id' | 'cr
     return {
       id: data.id,
       client_id: data.client_id,
+      client_name: data.clients?.name,
       name: data.name,
       email: data.email,
       status: data.status as 'active' | 'inactive',
