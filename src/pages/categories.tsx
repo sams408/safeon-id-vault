@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/data-table";
-import { Edit, Trash, MoreHorizontal, Plus } from "lucide-react";
+import { Edit, Trash, MoreHorizontal, Plus, LayoutList } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +40,7 @@ const Categories = () => {
 
   useEffect(() => {
     loadCategories();
-  }, [toast]);
+  }, []);
 
   const handleAddCategory = () => {
     setDialogOpen(true);
@@ -111,8 +111,9 @@ const Categories = () => {
         searchPlaceholder="Buscar categorías..."
         onAddNew={handleAddCategory}
         isLoading={isLoading}
+        icon={LayoutList}
         addButtonIcon={<Plus className="mr-2" size={16} />}
-        addButtonText="Nuevo"
+        addButtonText="Nueva categoría"
       />
       
       <CategoryDialog 

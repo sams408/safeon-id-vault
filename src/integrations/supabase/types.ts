@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           created_at: string
@@ -120,7 +138,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_category: {
+        Args: {
+          category_name: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+        }[]
+      }
+      delete_category: {
+        Args: {
+          category_id: string
+        }
+        Returns: undefined
+      }
+      get_categories: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+        }[]
+      }
+      get_category_by_id: {
+        Args: {
+          category_id: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+        }[]
+      }
+      update_category: {
+        Args: {
+          category_id: string
+          category_name: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
