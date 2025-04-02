@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
 import { Edit, Trash, Eye, MoreHorizontal, Shield } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,33 +15,37 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { fetchUsers, User } from "@/services/users";
+import { UserForm } from "@/components/users/UserForm";
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const data = await fetchUsers();
-        setUsers(data);
-      } catch (error) {
-        console.error("Error loading users:", error);
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar los usuarios",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadUsers();
-  }, [toast]);
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await fetchUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error loading users:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los usuarios",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddUser = () => {
+    setIsDialogOpen(true);
     console.log("Add new user");
   };
 
@@ -117,6 +122,13 @@ const Users = () => {
         onAddNew={handleAddUser}
         isLoading={isLoading}
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <UserForm 
+          onUserCreated={loadUsers}
+          onCancel={() => setIsDialogOpen(false)}
+        />
+      </Dialog>
     </div>
   );
 };
