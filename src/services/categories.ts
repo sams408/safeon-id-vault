@@ -11,9 +11,10 @@ export const fetchCategories = async (): Promise<Category[]> => {
   try {
     console.log('Fetching categories...');
     
+    // Use a raw SQL query to get the categories since it's not in the TypeScript types yet
     const { data, error } = await supabase
-      .from('categories')
-      .select('id, name');
+      .rpc('get_categories')
+      .select();
 
     if (error) {
       console.error('Error fetching categories:', error);
@@ -48,10 +49,9 @@ export const fetchCategories = async (): Promise<Category[]> => {
 
 export const fetchCategoryById = async (id: string): Promise<Category | null> => {
   try {
+    // Use a raw SQL query to get a specific category
     const { data, error } = await supabase
-      .from('categories')
-      .select('id, name')
-      .eq('id', id)
+      .rpc('get_category_by_id', { category_id: id })
       .single();
     
     if (error) {
@@ -70,10 +70,9 @@ export const fetchCategoryById = async (id: string): Promise<Category | null> =>
 
 export const createCategory = async (category: Omit<Category, 'id' | 'product_count'>): Promise<Category> => {
   try {
+    // Use a raw SQL query to insert a new category
     const { data, error } = await supabase
-      .from('categories')
-      .insert(category)
-      .select()
+      .rpc('create_category', { category_name: category.name })
       .single();
     
     if (error) {
@@ -90,11 +89,12 @@ export const createCategory = async (category: Omit<Category, 'id' | 'product_co
 
 export const updateCategory = async (id: string, category: Partial<Omit<Category, 'id' | 'product_count'>>): Promise<Category> => {
   try {
+    // Use a raw SQL query to update a category
     const { data, error } = await supabase
-      .from('categories')
-      .update(category)
-      .eq('id', id)
-      .select()
+      .rpc('update_category', { 
+        category_id: id, 
+        category_name: category.name 
+      })
       .single();
     
     if (error) {
@@ -121,10 +121,9 @@ export const updateCategory = async (id: string, category: Partial<Omit<Category
 
 export const deleteCategory = async (id: string): Promise<void> => {
   try {
+    // Use a raw SQL query to delete a category
     const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', id);
+      .rpc('delete_category', { category_id: id });
 
     if (error) {
       console.error('Error deleting category:', error);

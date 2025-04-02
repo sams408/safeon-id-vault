@@ -18,6 +18,8 @@ interface DataTableProps<T> {
   onAddNew?: () => void;
   isLoading?: boolean;
   icon?: LucideIcon;
+  addButtonIcon?: React.ReactNode;
+  addButtonText?: string;
 }
 
 export function DataTable<T>({
@@ -28,6 +30,8 @@ export function DataTable<T>({
   onAddNew,
   isLoading = false,
   icon: Icon,
+  addButtonIcon,
+  addButtonText = "Nuevo",
 }: DataTableProps<T>) {
   return (
     <div className="space-y-4">
@@ -52,8 +56,8 @@ export function DataTable<T>({
           </Button>
           {onAddNew && (
             <Button onClick={onAddNew}>
-              <PlusCircle className="mr-2" size={18} />
-              Nuevo
+              {addButtonIcon || <PlusCircle className="mr-2" size={18} />}
+              {addButtonText}
             </Button>
           )}
         </div>
