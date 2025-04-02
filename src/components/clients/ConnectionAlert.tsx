@@ -20,6 +20,9 @@ export const ConnectionAlert = ({ visible }: ConnectionAlertProps) => {
       <AlertDescription>
         No se pudo conectar a Supabase. Verifique que su URL y clave de Supabase sean correctas en el archivo .env. 
         La URL debe tener el formato: https://tu-proyecto-id.supabase.co
+        <br />
+        <br />
+        Si el error persiste, verifique que la tabla 'clients' existe en su proyecto de Supabase.
       </AlertDescription>
     </Alert>
   );
