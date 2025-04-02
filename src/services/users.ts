@@ -12,15 +12,19 @@ export interface User {
   created_by: string;
 }
 
-// Simple implementation using only the 'clients' table until other tables are created
 export const fetchUsers = async (): Promise<User[]> => {
   try {
     console.log('Fetching users...');
     
-    // Temporarily use the existing clients table
+    // Fetch from the dedicated users table
     const { data, error } = await supabase
-      .from('clients')
-      .select('*')
+      .from('users')
+      .select(`
+        *,
+        clients:client_id (
+          name
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -28,16 +32,16 @@ export const fetchUsers = async (): Promise<User[]> => {
       throw error;
     }
 
-    // Transform clients into the User structure as a temporary solution
-    return (data || []).map(client => ({
-      id: client.id,
-      client_id: client.id,  // Using same id for now
-      client_name: client.name,
-      name: client.name,
-      email: client.email,
-      status: client.status as 'active' | 'inactive',
-      created_at: client.created_at,
-      created_by: 'system' // Default value
+    // Transform the data to match the User interface
+    return (data || []).map(user => ({
+      id: user.id,
+      client_id: user.client_id,
+      client_name: user.clients?.name,
+      name: user.name,
+      email: user.email,
+      status: user.status as 'active' | 'inactive',
+      created_at: user.created_at,
+      created_by: user.created_by
     }));
   } catch (error) {
     console.error('Error in fetchUsers:', error);
@@ -47,10 +51,14 @@ export const fetchUsers = async (): Promise<User[]> => {
 
 export const fetchUserById = async (id: string): Promise<User | null> => {
   try {
-    // Temporarily use the clients table
     const { data, error } = await supabase
-      .from('clients')
-      .select('*')
+      .from('users')
+      .select(`
+        *,
+        clients:client_id (
+          name
+        )
+      `)
       .eq('id', id)
       .single();
 
@@ -61,16 +69,15 @@ export const fetchUserById = async (id: string): Promise<User | null> => {
 
     if (!data) return null;
 
-    // Map client data to User structure
     return {
       id: data.id,
-      client_id: data.id,
-      client_name: data.name,
+      client_id: data.client_id,
+      client_name: data.clients?.name,
       name: data.name,
       email: data.email,
       status: data.status as 'active' | 'inactive',
       created_at: data.created_at,
-      created_by: 'system'
+      created_by: data.created_by
     };
   } catch (error) {
     console.error('Error in fetchUserById:', error);
@@ -80,17 +87,17 @@ export const fetchUserById = async (id: string): Promise<User | null> => {
 
 export const createUser = async (user: Omit<User, 'id' | 'created_at' | 'client_name'>): Promise<User> => {
   try {
-    // For now, we'll create a client instead
-    const clientData = {
-      name: user.name,
-      email: user.email,
-      phone: '',  // Required field for clients
-      status: user.status
-    };
-
+    console.log('Creating user with data:', user);
+    
     const { data, error } = await supabase
-      .from('clients')
-      .insert([clientData])
+      .from('users')
+      .insert([{
+        name: user.name,
+        email: user.email,
+        client_id: user.client_id,
+        status: user.status,
+        created_by: user.created_by
+      }])
       .select()
       .single();
 
@@ -99,15 +106,16 @@ export const createUser = async (user: Omit<User, 'id' | 'created_at' | 'client_
       throw error;
     }
 
-    // Map client data to User structure
+    console.log('User created successfully:', data);
+    
     return {
       id: data.id,
-      client_id: user.client_id,
+      client_id: data.client_id,
       name: data.name,
       email: data.email,
       status: data.status as 'active' | 'inactive',
       created_at: data.created_at,
-      created_by: user.created_by
+      created_by: data.created_by
     };
   } catch (error) {
     console.error('Error in createUser:', error);
@@ -117,15 +125,15 @@ export const createUser = async (user: Omit<User, 'id' | 'created_at' | 'client_
 
 export const updateUser = async (id: string, user: Partial<Omit<User, 'id' | 'created_at' | 'client_name'>>): Promise<User> => {
   try {
-    // For now, just update the client
-    const clientData: any = {};
-    if (user.name) clientData.name = user.name;
-    if (user.email) clientData.email = user.email;
-    if (user.status) clientData.status = user.status;
-
     const { data, error } = await supabase
-      .from('clients')
-      .update(clientData)
+      .from('users')
+      .update({
+        name: user.name,
+        email: user.email,
+        client_id: user.client_id,
+        status: user.status,
+        created_by: user.created_by
+      })
       .eq('id', id)
       .select()
       .single();
@@ -135,15 +143,14 @@ export const updateUser = async (id: string, user: Partial<Omit<User, 'id' | 'cr
       throw error;
     }
 
-    // Map client data to User structure
     return {
       id: data.id,
-      client_id: user.client_id || data.id,
+      client_id: data.client_id,
       name: data.name,
       email: data.email,
       status: data.status as 'active' | 'inactive',
       created_at: data.created_at,
-      created_by: user.created_by || 'system'
+      created_by: data.created_by
     };
   } catch (error) {
     console.error('Error in updateUser:', error);
@@ -153,9 +160,8 @@ export const updateUser = async (id: string, user: Partial<Omit<User, 'id' | 'cr
 
 export const deleteUser = async (id: string): Promise<void> => {
   try {
-    // For now, delete the client
     const { error } = await supabase
-      .from('clients')
+      .from('users')
       .delete()
       .eq('id', id);
 

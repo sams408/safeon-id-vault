@@ -22,7 +22,7 @@ export const UserForm = ({ onUserCreated, onCancel }: UserFormProps) => {
     created_by: "admin", // Default value
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingClients, setIsLoadingClients] = useState(true);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
