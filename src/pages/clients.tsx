@@ -1,75 +1,41 @@
-
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DataTable, Column } from "@/components/data-table";
+import { Edit, Trash, Eye, MoreHorizontal, Shield } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { fetchClients, Client } from "@/services/clients";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchUsers, User } from "@/services/users";
+import { UserForm } from "@/components/users/UserForm";
 
-// Import our new components
-import { ClientsTable } from "@/components/clients/ClientsTable";
-import { ClientForm } from "@/components/clients/ClientForm";
-import { ConnectionAlert } from "@/components/clients/ConnectionAlert";
-
-const Clients = () => {
-  const [clients, setClients] = useState<Client[]>([]);
+const Users = () => {
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [connectionError, setConnectionError] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadClients();
-    // Test Supabase connection on component mount
-    testSupabaseConnection().then(isConnected => {
-      setConnectionError(!isConnected);
-    });
+    loadUsers();
   }, []);
 
-  const testSupabaseConnection = async () => {
-    try {
-      // First try a simple query to test the connection
-      // Don't pass any parameters to select() to avoid type errors
-      const { error: clientsError } = await supabase
-        .from('clients')
-        .select();
-      
-      if (clientsError) {
-        console.error('Clients table connection failed:', clientsError);
-        return false;
-      }
-      
-      // Try to call the get_client_count function if it exists
-      try {
-        const { error: rpcError } = await supabase.rpc('get_client_count');
-        if (rpcError) {
-          console.error('RPC function call failed (expected if not created yet):', rpcError);
-          // Continue even if this fails
-        }
-      } catch (rpcException) {
-        console.error('RPC exception (non-critical):', rpcException);
-        // Continue even if this fails
-      }
-      
-      console.log('Supabase connection successful');
-      return true;
-    } catch (error) {
-      console.error('Supabase connection failed:', error);
-      return false;
-    }
-  };
-
-  const loadClients = async () => {
+  const loadUsers = async () => {
     try {
       setIsLoading(true);
-      const data = await fetchClients();
-      setClients(data);
-      setConnectionError(false);
+      const data = await fetchUsers();
+      setUsers(data);
     } catch (error) {
-      console.error("Error loading clients:", error);
-      setConnectionError(true);
+      console.error("Error loading users:", error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los clientes. Verifique su conexión a Supabase.",
+        description: "No se pudieron cargar los usuarios",
         variant: "destructive",
       });
     } finally {
@@ -77,24 +43,88 @@ const Clients = () => {
     }
   };
 
-  const handleAddClient = () => {
+  const handleAddUser = () => {
     setIsDialogOpen(true);
-    console.log("Add new client");
+    console.log("Add new user");
   };
+
+  const columns: Column<User>[] = [
+    {
+      header: "Nombre",
+      accessorKey: "name",
+    },
+    {
+      header: "Cliente",
+      accessorKey: "client_name",
+    },
+    {
+      header: "Email",
+      accessorKey: "email",
+    },
+    {
+      header: "Estado",
+      accessorKey: "status",
+      cell: (user) => (
+        <Badge variant={user.status === "active" ? "success" : "secondary"}>
+          {user.status === "active" ? "Activo" : "Inactivo"}
+        </Badge>
+      ),
+    },
+    {
+      header: "Creado el",
+      accessorKey: "created_at",
+      cell: (user) => new Date(user.created_at).toLocaleDateString(),
+    },
+    {
+      header: "Creado por",
+      accessorKey: "created_by",
+    },
+    {
+      header: "Acciones",
+      accessorKey: "id",
+      cell: (user) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Eye size={16} className="mr-2" /> Ver detalles
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Edit size={16} className="mr-2" /> Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Shield size={16} className="mr-2" /> Permisos
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive">
+              <Trash size={16} className="mr-2" /> Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <ConnectionAlert visible={connectionError} />
-      
-      <ClientsTable 
-        clients={clients}
+      <DataTable
+        columns={columns}
+        data={users}
+        title="Usuarios"
+        searchPlaceholder="Buscar usuarios..."
+        onAddNew={handleAddUser}
         isLoading={isLoading}
-        onAddNew={handleAddClient}
       />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <ClientForm 
-          onClientCreated={loadClients}
+        <UserForm 
+          onUserCreated={loadUsers}
           onCancel={() => setIsDialogOpen(false)}
         />
       </Dialog>
@@ -102,4 +132,4 @@ const Clients = () => {
   );
 };
 
-export default Clients;
+export default Users;
