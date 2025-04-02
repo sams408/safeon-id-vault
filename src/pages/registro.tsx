@@ -5,6 +5,7 @@ import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 const Registro = () => {
   const [name, setName] = useState("");
@@ -12,20 +13,58 @@ const Registro = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validar que las contraseñas coincidan
-    if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden");
+    
+    // Form validation
+    if (!name || !email || !password || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Por favor, completa todos los campos",
+        variant: "destructive",
+      });
       return;
     }
     
-    // Aquí iría la lógica de registro
-    console.log("Registrando usuario:", name, email, password);
-    // Por ahora, simulamos un registro exitoso y redirigimos al login
-    navigate("/login");
+    // Validate that passwords match
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Las contraseñas no coinciden",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      console.log("Registrando usuario:", name, email, password);
+      
+      // Simulate registration delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Success notification
+      toast({
+        title: "¡Registro exitoso!",
+        description: "Tu cuenta ha sido creada correctamente",
+      });
+      
+      // Navigate to login
+      navigate("/login");
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo completar el registro. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,6 +98,7 @@ const Registro = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -79,6 +119,7 @@ const Registro = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -99,11 +140,13 @@ const Registro = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -126,6 +169,7 @@ const Registro = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -133,8 +177,9 @@ const Registro = () => {
               <Button 
                 type="submit" 
                 className="w-full py-2 px-4 bg-safeon-600 hover:bg-safeon-700 text-white font-medium rounded-md"
+                disabled={isLoading}
               >
-                Registrarme
+                {isLoading ? "Procesando..." : "Registrarme"}
               </Button>
             </form>
 

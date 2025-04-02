@@ -5,19 +5,53 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
-    console.log("Iniciando sesión con:", email, password);
-    // Por ahora, simulamos un login exitoso
-    navigate("/");
+    
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Por favor, completa todos los campos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      console.log("Iniciando sesión con:", email, password);
+      
+      // Simulate authentication delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Success notification
+      toast({
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión correctamente",
+      });
+      
+      // Navigate to dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error de inicio de sesión:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo iniciar sesión. Verifica tus credenciales.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -51,6 +85,7 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -71,11 +106,13 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -85,8 +122,9 @@ const Login = () => {
               <Button 
                 type="submit" 
                 className="w-full py-2 px-4 bg-safeon-600 hover:bg-safeon-700 text-white font-medium rounded-md"
+                disabled={isLoading}
               >
-                Ingresar
+                {isLoading ? "Procesando..." : "Ingresar"}
               </Button>
             </form>
 

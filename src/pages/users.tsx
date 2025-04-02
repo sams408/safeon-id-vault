@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/data-table";
@@ -23,13 +23,10 @@ const Users = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await fetchUsers();
@@ -44,7 +41,11 @@ const Users = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const handleAddUser = () => {
     setSelectedUserId(null);
@@ -54,7 +55,6 @@ const Users = () => {
 
   const handleViewDetails = (id: string) => {
     console.log("View user details:", id);
-    // Implement view details logic here
     toast({
       title: "Ver detalles",
       description: `Acción para ver detalles del usuario ${id}`,
@@ -69,7 +69,6 @@ const Users = () => {
 
   const handlePermissions = (id: string) => {
     console.log("Manage permissions for user:", id);
-    // Implement permissions management logic here
     toast({
       title: "Gestionar permisos",
       description: `Acción para gestionar permisos del usuario ${id}`,
@@ -85,12 +84,13 @@ const Users = () => {
     if (!selectedUserId) return;
     
     try {
+      setIsDeleting(true);
       await deleteUser(selectedUserId);
       toast({
         title: "Éxito",
         description: "Usuario eliminado correctamente",
       });
-      loadUsers();
+      await loadUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
       toast({
@@ -101,6 +101,7 @@ const Users = () => {
     } finally {
       setIsDeleteDialogOpen(false);
       setSelectedUserId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -202,14 +203,16 @@ const Users = () => {
               <Button
                 variant="outline"
                 onClick={() => setIsDeleteDialogOpen(false)}
+                disabled={isDeleting}
               >
                 Cancelar
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteConfirm}
+                disabled={isDeleting}
               >
-                Eliminar
+                {isDeleting ? "Eliminando..." : "Eliminar"}
               </Button>
             </div>
           </div>
