@@ -46,6 +46,9 @@ export const createProduct = async (product: Omit<Product, 'id' | 'created_at' |
 // Update an existing product
 export const updateProduct = async (id: string, product: Partial<Omit<Product, 'id' | 'created_at' | 'client_name'>>): Promise<Product> => {
   try {
+    console.log('Updating product with ID:', id);
+    console.log('Update data:', product);
+    
     const updateData: any = {};
     
     // Only include fields that are provided
@@ -68,6 +71,7 @@ export const updateProduct = async (id: string, product: Partial<Omit<Product, '
       throw error;
     }
 
+    console.log('Product updated successfully:', data);
     return mapProductRecord(data as ProductRecord);
   } catch (error) {
     console.error('Error in updateProduct:', error);

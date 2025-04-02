@@ -118,6 +118,7 @@ export const ProductForm = ({
 
     try {
       if (isEditMode && initialProduct) {
+        // Fixed: Pass the id as the first parameter for updateProduct
         await updateProduct(initialProduct.id, newProduct);
         toast({
           title: "Éxito",

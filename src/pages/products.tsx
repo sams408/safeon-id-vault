@@ -70,6 +70,7 @@ const Products = () => {
 
   const handleEditProduct = async (id: string) => {
     try {
+      console.log("Editing product with ID:", id);
       const product = await fetchProductById(id);
       if (product) {
         setSelectedProduct(product);
@@ -130,7 +131,7 @@ const Products = () => {
         onOpenChange={setDialogOpen}
         onProductCreated={handleProductCreated}
         onCancel={() => setDialogOpen(false)}
-        product={isEditMode ? selectedProduct : null}
+        product={selectedProduct}
         isEditMode={isEditMode}
       />
 
